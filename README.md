@@ -758,7 +758,6 @@ sequenceDiagram
       "vrc": null,
       "linked": true,
       "mutual": false,
-      "at": 1792830000000,
       "fresh": true
     }
   ],
@@ -779,7 +778,7 @@ sequenceDiagram
 | `stars[].group` | 所属星群：`G` 漫游、`W` 游戏、`Z` 创作、`L` 聊天、`A` 万象 |
 | `stars[].vrc` | **只有互相连上（`mutual: true`）时才给对方的 VRChat 名字**，否则为 `null` |
 | `stars[].linked` / `mutual` | 我是否已连向 TA / 双方是否已互相连上 |
-| `stars[].fresh` | 是否为还没看过的新相交记录。和已经互相连上（`mutual: true`）的星的相交不算新的，一直是 `false`（2026-10-31 起）；它们照样在列表里 |
+| `stars[].fresh` | 目前不提供相交的具体时间，判断新旧看这个字段。是否为还没看过的新相交记录。和已经互相连上（`mutual: true`）的星的相交不算新的，一直是 `false`（2026-10-31 起）；它们照样在列表里 |
 | `why` | 为何不可用或为空：<br>• `null`：正常<br>• `hide`：不给这位玩家看（**此时客户端不要显示这一整块**）<br>• `verify`：还没验证 VRChat 账号<br>• `wait`：VRChat 账号验证中<br>• `queued` / `sent`：机器人的好友请求排队中 / 已发出，等玩家在 VRChat 里同意<br>• `gone` / `friend`：玩家删了或关了机器人好友 |
 
 ---
@@ -790,15 +789,23 @@ sequenceDiagram
 
 ```json
 {
-  "cards": [{ "n": 3, "name": "彩蛋猎人", "group": "G", "why": "cross", "linked": false, "mutual": false, "linkedMe": true, "at": 1792830000000 }],
-  "seen": 0,
+  "cards": [
+    { "n": 3, "name": "彩蛋猎人", "group": "G", "why": "cross", "linked": false, "mutual": false, "linkedMe": true, "fresh": true },
+    { "n": 9, "name": "夜航员", "group": "L", "why": "cross", "linked": true, "mutual": true, "linkedMe": true, "fresh": false,
+      "pair": { "at": 1792830000000, "src": "yq", "mine": false, "met": { "at": 1792900800000, "world": "天井 Skywell｜中文社区 Chinese Community" } } }
+  ],
   "left": 5,
   "max": 5
 }
 ```
 
-- `cards`：星卡的主要字段见「[网页上的动作](#网页上的动作)」；`linkedMe` 是 TA 已经连向我，`at` 是最近一次擦肩的时间。
-- `seen`：上次看过时最新那次擦肩的时间，`at` 比它新的就是新的。
+- `cards`：星卡的主要字段见「[网页上的动作](#网页上的动作)」；`linkedMe` 是 TA 已经连向我，`fresh` 是还没看过的新记录（和 `stars[].fresh` 一样）。目前不提供相交的具体时间。
+- `pair`：只有互相连上的星卡才有，和网页星卡上那几行一样：
+  - `pair.at`：互相连上的时间。
+  - `pair.src`：最先那条线是怎么来的：rec 今日推荐、back 回应对方的连线、fof 共同好友、pick 在星空里挑中、invite 邀请口令、xd 报名星搭、xd-ok 星搭选中同行、cross 星轨相交、yq 从星友圈看到；可能增加新的取值，老记录也可能是 null，不认识的请当成没有。
+  - `pair.mine`：最先那条线是不是我连的。
+  - `pair.met`：最近一次星轨相交。只在双方都开着星轨相交、并且最近 30 天内有记录时才有。`met.at` 只精确到天（那一天北京时间中午 12 点），这是有意的；`met.world` 是 VRChat 世界名原文，可能自带社群名，不要按分隔符拆分，还没读到名字时是 `null`。
+- 星卡里还有别的字段（比如 `clubs`、`online`、`scores`、`vrcInfo`），是网页自己用的，不作保证，可能变化或去掉。
 - `left` / `max`：今天还能从星轨相交连几颗 / 每天最多几颗。
 - 算第二份读的次数。
 

@@ -610,7 +610,6 @@
           "vrc": null,
           "linked": false,
           "mutual": false,
-          "at": 1793047368878,
           "fresh": true
         }
       ],
@@ -658,10 +657,53 @@
           "linked": false,
           "mutual": false,
           "linkedMe": true,
-          "at": 1793047368878
+          "fresh": true
+        },
+        {
+          "n": 9,
+          "pos": "G1",
+          "name": "夜航员",
+          "line": "进了新世界先去找隐藏房间，找到了就招呼同伴来看。",
+          "group": "L",
+          "groupName": "聊天星群",
+          "vibe": "随场",
+          "lead": "双向",
+          "intro": "喜欢在安静的世界里散步。",
+          "about": [],
+          "common": [
+            "你们都想找人一起逛新世界",
+            "你们都常在工作日晚上在线",
+            "你们都在漫游星群"
+          ],
+          "photo": false,
+          "rating": null,
+          "star": null,
+          "verified": false,
+          "scores": {
+            "G": 50,
+            "W": 50,
+            "Z": 50,
+            "L": 50
+          },
+          "deco": null,
+          "sprout": true,
+          "why": "cross",
+          "linked": true,
+          "mutual": true,
+          "linkedMe": true,
+          "fresh": false,
+          "vrc": "玩家的 VRChat 名字",
+          "pair": {
+            "at": 1792830000000,
+            "src": "yq",
+            "mine": false,
+            "met": {
+              "at": 1792900800000,
+              "world": "天井 Skywell｜中文社区 Chinese Community"
+            }
+          }
         }
       ],
-      "seen": 0,
       "left": 5,
       "max": 5
     }

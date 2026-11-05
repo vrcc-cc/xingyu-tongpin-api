@@ -2,6 +2,14 @@
 
 接口要变的地方先写在这里。兼容和弃用的规则见 [README → 兼容和弃用](README.md#兼容和弃用)：只做加法，要删要改的至少再留 60 天。每条后面括号里是版本号。
 
+## 2026-11-05 · 星轨相交的文档对上线上（1.15.3）
+
+只改文档，接口没变。感谢 [#1](https://github.com/vrcc-cc/xingyu-tongpin-api/issues/1)。
+
+- **去掉不会返回的字段**：`GET /me/crossings` 的 `stars[].at`，`GET /me/crossings/cards` 的 `cards[].at` 和 `seen`。目前不提供相交的具体时间，判断新旧用 `fresh`。
+- **写明 `pair`**：互相连上的星卡上的 `at`、`src`（附取值表）、`mine`、`met`。`met.at` 只精确到天，`met.world` 是世界名原文，不要拆分。
+- **`examples/responses.json`** 这两个接口和线上对齐。星卡上其他没写明的字段不作保证。
+
 ## 2026-10-31 · 星轨相交不提示已经互相连上的（1.15.2）
 
 字段不变，意思变了一点，没有新权限。

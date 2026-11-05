@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: "星遇同频 · 开放接口 (Open API v1)"
-  version: "1.15.2"
+  version: "1.15.3"
   summary: "VRChat 中文社区「星遇同频」开放数据与第三方客户端接口"
   description: |
     [星遇同频](https://vrcc.cc/match/) 的官方开放接口，基础地址为 `https://vrcc.cc/api/v1/`。
@@ -839,7 +839,7 @@ paths:
                     type: array
                     items:
                       type: object
-                      required: [n, name, line, group, star, intro, vrc, linked, mutual, at, fresh]
+                      required: [n, name, line, group, star, intro, vrc, linked, mutual, fresh]
                       properties:
                         n:
                           type: integer
@@ -875,10 +875,6 @@ paths:
                           type: boolean
                           description: "是否已经双向连上"
                           example: false
-                        at:
-                          type: integer
-                          description: "相交发生的时间（毫秒时间戳）"
-                          example: 1792830000000
                         fresh:
                           type: boolean
                           description: "是否为上次查看后新产生的记录；和已经互相连上的星的相交不算新的（false），2026-10-31 起"
@@ -934,16 +930,13 @@ paths:
               schema:
                 type: object
                 additionalProperties: true
-                required: [cards, seen, left, max]
+                required: [cards, left, max]
                 properties:
                   cards:
                     type: array
-                    description: "星卡；linkedMe 是 TA 已连向我，at 是最近一次擦肩的时间"
+                    description: "星卡；linkedMe 是 TA 已连向我，fresh 是还没看过的新记录（和 stars[].fresh 一样），互相连上的星带 pair。目前不提供相交的具体时间"
                     items:
                       $ref: "#/components/schemas/StarCard"
-                  seen:
-                    type: integer
-                    description: "上次看过时最新那次擦肩的时间；at 比它新的就是新的"
                   left:
                     type: integer
                     description: "今天还能从星轨相交连几颗"
@@ -4638,6 +4631,35 @@ components:
         mutual:
           type: boolean
           description: "已经互相连上"
+        pair:
+          type: object
+          description: "只有互相连上（mutual: true）的星卡才有：什么时候互相连上、怎么开始的、上次在哪星轨相交，和网页星卡上显示的一样"
+          required: [at, src, mine]
+          properties:
+            at:
+              type: integer
+              description: "互相连上的时间（毫秒时间戳）"
+              example: 1792830000000
+            src:
+              type: [string, "null"]
+              description: "最先那条线是怎么来的：rec 今日推荐、back 回应对方的连线、fof 共同好友、pick 在星空里挑中、invite 邀请口令、xd 报名星搭、xd-ok 星搭选中同行、cross 星轨相交、yq 从星友圈看到；可能增加新的取值，老记录也可能是 null，不认识的请当成没有"
+              example: "yq"
+            mine:
+              type: boolean
+              description: "最先那条线是不是我连的"
+            met:
+              type: object
+              description: "最近一次星轨相交。只在双方都开着星轨相交、并且最近 30 天内有记录时才有"
+              required: [at, world]
+              properties:
+                at:
+                  type: integer
+                  description: "只精确到天：那一天北京时间中午 12 点的毫秒时间戳。这是有意的，不是具体时刻"
+                  example: 1792830000000
+                world:
+                  type: [string, "null"]
+                  description: "VRChat 世界名原文，可能自带社群名，不要按分隔符拆分；还没读到名字时是 null"
+                  example: "天井 Skywell｜中文社区 Chinese Community"
         vrc:
           type: string
           description: "对方的 VRChat 名字，只在互相连上时才有"
