@@ -4658,7 +4658,7 @@ components:
                   example: 1792830000000
                 world:
                   type: [string, "null"]
-                  description: "VRChat 世界名原文，可能自带社群名，不要按分隔符拆分；还没读到名字时是 null"
+                  description: "VRChat 世界名原文，可能自带社群名，不要按分隔符拆分；还没读到名字或地图不能显示时是 null"
                   example: "天井 Skywell｜中文社区 Chinese Community"
         vrc:
           type: string
