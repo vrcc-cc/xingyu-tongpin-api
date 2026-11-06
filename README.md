@@ -1429,7 +1429,7 @@ curl -H "X-Client: app_0123456789abcdef" -H "Authorization: Bearer <access_token
 }
 ```
 
-缓存一天，以后可能会加新贴纸。贴纸 id 是小写字母开头、可以带数字（比如里程碑贴纸 `ms1`）。滴胶（`resin`）只是少数限定贴纸的唯一材质（支持者贴纸、千星），别的贴纸没有。
+缓存一天，以后可能会加新贴纸。贴纸 id 是小写字母开头、可以带数字（比如里程碑贴纸 `ms1`）。滴胶（`resin`）只是少数限定贴纸的唯一材质（支持者贴纸、千星），别的贴纸没有。VRChat 等级贴纸 `tr1`–`tr4` 只有一种材质，对应 New User、User、Known User、Trusted User。
 
 ### 一张贴纸：`GET /api/v1/stickers/{id}?fin=&wear=&seed=`
 

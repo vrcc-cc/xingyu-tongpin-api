@@ -2,6 +2,12 @@
 
 接口要变的地方先写在这里。兼容和弃用的规则见 [README → 兼容和弃用](README.md#兼容和弃用)：只做加法，要删要改的至少再留 60 天。每条后面括号里是版本号。
 
+## 2026-11-07 · VRChat 等级贴纸（1.15.4）
+
+只加不改，没有新权限。
+
+- **新贴纸**：tr1–tr4（New User 纸质、User 闪粉、Known User 镭射、Trusted User 烫金），在 GET /stickers 的最后。玩家的 VRChat 等级升上来或领取时得到，可以出现在星卡的 deco.spots 和 GET /me/bag 里。
+
 ## 2026-11-05 · 星轨相交的文档对上线上（1.15.3）
 
 只改文档，接口没变。感谢 [#1](https://github.com/vrcc-cc/xingyu-tongpin-api/issues/1)。
