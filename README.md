@@ -124,7 +124,7 @@
 ### 名字和 logo
 
 17. **不拿我们的 logo 和名字当你的品牌。** VRChat 中文社区（VRCC）的 logo、星遇同频的图标和名字，不能用作你的应用图标、头像、启动画面，也不能放进你的应用名里。我们的 logo 里有 VRChat 的商标，我们没法替 VRChat 授权给别人用。
-18. **注明来源用文字。** 可以写「数据来自星遇同频」或「基于星遇同频开放接口」，链接到 https://vrcc.cc/match/。
+18. **注明来源用文字。** 可以写「数据来自星遇同频」或「基于星遇同频开放接口」，链接到 [vrcc.cc/match](https://vrcc.cc/match/)。
 19. **登录按钮只写字。** 「用星遇同频登录」按钮写这几个字就好，不放我们的 logo，样式跟着你的网站走。
 20. **审核通过才能说通过审核。** 审核通过的应用可以写「已通过星遇同频审核」；没审核或审核被撤回的不能写，撤回后要去掉。
 
@@ -373,15 +373,15 @@ sequenceDiagram
   "at": 1792830000000,
   "maps": [
     {
-      "world": "wrld_…",
+      "world": "wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570",
       "name": "地图名",
       "author": "作者",
       "avg": 9.1,
       "raters": 9,
       "rank": 1,
       "weight": "light",
-      "page": "https://vrcc.cc/maps/wrld_…",
-      "img": "https://vrcc.cc/maps/wrld_….jpg"
+      "page": "https://vrcc.cc/maps/wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570",
+      "img": "https://vrcc.cc/maps/wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570.jpg"
     }
   ]
 }
@@ -956,13 +956,13 @@ sequenceDiagram
 {
   "maps": [
     {
-      "world": "wrld_…",
+      "world": "wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570",
       "name": "地图名",
       "score": 9,
       "words": "我写的短评",
       "wordsOk": "ok",
       "at": 1792830000000,
-      "page": "https://vrcc.cc/maps/wrld_…"
+      "page": "https://vrcc.cc/maps/wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570"
     }
   ]
 }
