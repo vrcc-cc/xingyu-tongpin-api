@@ -265,7 +265,7 @@ sequenceDiagram
 | `link` | 在你操作时，向其他星发起连线 | `POST me/links` | | ✓ |
 | `chat` | 查看你的私聊（会看到对方发来的消息） | `GET me/chats`、`GET me/chats/{n}` | | ✓ |
 | `chat.send` | 在你操作时，发送私聊消息 | `POST me/chats/{n}` | | ✓ |
-| `posts` | 查看星友圈（会看到其他玩家的动态） | `GET me/posts` | | ✓ |
+| `posts` | 查看星友圈（会看到其他玩家的动态） | `GET me/posts`；地图页的玩家照片（1.19.0 起） | | ✓ |
 | `posts.write` | 在你操作时，发布星友圈动态 | `POST me/posts`、评论、点亮、删除、合照 | | ✓ |
 | `photos` | 查看其他玩家的照片（互相连上后才是清晰的） | `GET me/stars/{n}/photo` | | ✓ |
 | `maps.write` | 在你操作时，写地图介绍、给短评点赞或踩、添加地图 | `POST me/maps`、`…/intro`、`me/map-votes` | | ✓ |
@@ -1365,13 +1365,15 @@ sequenceDiagram
 | `POST` | `/api/v1/me/comments/{cid}/report` | `safety` | 举报评论（{why}） |  |
 | `GET` | `/api/v1/me/board` | `maps` | 玩家看到的地图榜（?sort=top|week|new|went&q=&w=） | 和网页「榜单」一样，带玩家自己的评分、去过、热评（hots）；q 搜榜上的地图名或作者。`sort=week` 时有 `weeks`、每张图的 `move` / `fresh`，`w` 看往周（1.16.0 起，这位玩家所在星池自己的周榜）。 |
 | `POST` | `/api/v1/me/maps` | `maps.write` | 添加地图（{world}） | world 是 wrld_… 或地图链接；要过地图检查才上榜。 |
-| `GET` | `/api/v1/me/maps/{world}/page` | `maps` | 地图页（?sort=hot|new） | 分数分布、介绍、短评（最热：去过 > 已验证 > 赞）、配置、正在开的房。没有 `mutuals` 时写的人是「某位…」（见上）。 |
+| `GET` | `/api/v1/me/maps/{world}/page` | `maps` | 地图页（?sort=hot|new） | 分数分布、介绍、短评（最热：去过 > 已验证 > 赞）、配置、正在开的房。没有 `mutuals` 时写的人是「某位…」（见上）。令牌还有 `posts` 时多 `photos`：地图页上那一排玩家照片（1.19.0 起，见下）。 |
 | `GET` | `/api/v1/me/maps/{world}/intros` | `maps` | 这张地图的全部介绍 | 没有 `mutuals` 时写的人是「某位…」（见上）。 |
 | `POST` | `/api/v1/me/maps/{world}/intro` | `maps.write` | 写介绍（{text}） | 最多 200 字，过检查后显示。 |
 | `POST` | `/api/v1/me/maps/{world}/intro/delete` | `maps.write` | 删自己的介绍 |  |
 | `POST` | `/api/v1/me/maps/{world}/rating/delete` | `maps.rate` | 删自己的评分 |  |
 | `POST` | `/api/v1/me/map-votes` | `maps.write` | 给短评或介绍点赞 / 踩（{kind: rate|intro, id, v: 1|-1|0}） | 0 取消。不能投自己的。 |
 | `POST` | `/api/v1/me/map-reports` | `safety` | 举报短评或介绍（{kind: rate|intro, id, why}） | why：words、person、other。 |
+
+**地图页的玩家照片**（1.19.0 起）：网页地图页「打个分吧」上面那一排，是星友圈里带了这张地图的公开截图和合照（最新的在前，最多 12 张）。令牌有 `posts`（敏感）、客户端审核通过时，`GET me/maps/{world}/page` 多一个 `photos` 数组，每条和 `GET me/posts` 里的动态一样（图片也是 `img.url` 的 10 分钟签名链接，见「[星友圈的图](#星友圈的图get-apiv1imgidclientgexpsig)」），点开、评论、点亮、举报都用星友圈的接口。没有 `posts` 的令牌没有这个字段；16–17 岁星池没有照片，是空数组 `[]`，和没人发过的地图一样。添加地图、写介绍这些写接口回答里的地图页不带照片。
 
 ---
 

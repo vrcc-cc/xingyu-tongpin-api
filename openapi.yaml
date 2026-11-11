@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: "星遇同频 · 开放接口 (Open API v1)"
-  version: "1.18.0"
+  version: "1.19.0"
   summary: "VRChat 中文社区「星遇同频」开放数据与第三方客户端接口"
   description: |
     [星遇同频](https://vrcc.cc/match/) 的官方开放接口，基础地址为 `https://vrcc.cc/api/v1/`。
@@ -2726,6 +2726,8 @@ paths:
         **需要权限 `maps`。** 分数分布、介绍、短评（最热：去过 > 已验证 > 赞）、配置、正在开的房。 请求体：?sort=hot|new。
 
         写的人（短评、介绍、添加人的 `who` / `adder`）：令牌有 `mutuals` 且客户端审核通过时和网页一样（对方的 `n`，互相连上时还有 VRChat 名字）；没有时别的玩家都是 `{"name": "某位<星位>", "group": "G", "me": false}`，和公开地图页一样，不给编号和 VRChat 名字。自己的照旧。
+
+        玩家照片（1.19.0 起）：令牌还有 `posts`（敏感）、客户端审核通过时多 `photos`，见下。
       security:
         - client: []
           token: []
@@ -2739,6 +2741,11 @@ paths:
               schema:
                 type: object
                 properties:
+                  photos:
+                    type: array
+                    description: "只在令牌有 posts 时有（1.19.0 起）：星友圈里带了这张地图的公开截图和合照，最新的在前，最多 12 条，每条和 GET /me/posts 的动态一样（图片是 img.url 签名链接）。16–17 岁星池是 []"
+                    items:
+                      $ref: "#/components/schemas/Post"
                   map:
                     type: object
                     properties:
