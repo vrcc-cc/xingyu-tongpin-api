@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: "星遇同频 · 开放接口 (Open API v1)"
-  version: "1.15.4"
+  version: "1.16.0"
   summary: "VRChat 中文社区「星遇同频」开放数据与第三方客户端接口"
   description: |
     [星遇同频](https://vrcc.cc/match/) 的官方开放接口，基础地址为 `https://vrcc.cc/api/v1/`。
@@ -178,6 +178,13 @@ paths:
             type: string
             enum: [top, week, new]
             default: top
+        - name: w
+          in: query
+          description: "只能跟 sort=week：看哪一周（weeks[].w 里的周号），给的是那周当时存下的样子：名次、那周几人打分（week）和平均分（weekAvg），后来下架的图不给、其他图名次不动。没存过的周（比如本周还没结束）给本周，回答里没有 w。不是数字或不跟 sort=week 返回 400（1.16.0 起）"
+          schema:
+            type: integer
+            minimum: 0
+            example: 2965
         - name: client
           in: query
           description: "客户端标识（仅在无法发送 X-Client 请求头时使用，例如 VRChat Udon）"
@@ -201,6 +208,18 @@ paths:
                     type: string
                     enum: [top, week, new]
                     description: "这次用的排序（1.13.0 起）"
+                  weeks:
+                    type: array
+                    description: "只在 sort=week 时有：存过的周（那周有图上榜），新的在前，最多 104 周。周一零点（北京时间）结束时存下，以后不再变（1.16.0 起）"
+                    items:
+                      type: object
+                      properties:
+                        w: { type: integer, description: "周号，传给 w", example: 2965 }
+                        from: { type: integer, description: "这周开始的时间（北京时间周一零点，毫秒时间戳）", example: 1793548800000 }
+                  w:
+                    type: integer
+                    description: "只在 sort=week&w= 问到一个存过的周时有：给的是哪一周（1.16.0 起）"
+                    example: 2965
                   min:
                     type: integer
                     description: "有名次所需的最少评分人数"
@@ -2309,10 +2328,23 @@ paths:
       tags: ["网页上的动作"]
       summary: "玩家看到的地图榜"
       description: |
-        **需要权限 `maps`。** 和网页「榜单」一样，带玩家自己的评分、去过、热评（hots）；q 搜榜上的地图名或作者。 请求体：?sort=top|week|new|went&q=。
+        **需要权限 `maps`。** 和网页「榜单」一样，带玩家自己的评分、去过、热评（hots）；q 搜榜上的地图名或作者。 请求体：?sort=top|week|new|went&q=&w=。
+
+        `sort=week` 时（1.16.0 起）多 `weeks`（这位玩家所在星池存过的周，新的在前），`w=<周号>` 看那一周当时存下的样子（`rank` 是那周的名次，`raters`、`avg` 是那周的），回答多 `w`；每张图有对上一周的 `move` 或 `fresh`。没存过的周给本周、回答没有 `w`。两个星池各有自己的周榜，互相看不到。
       security:
         - client: []
           token: []
+      parameters:
+        - name: sort
+          in: query
+          schema: { type: string, enum: [top, week, new, went], default: top }
+        - name: q
+          in: query
+          schema: { type: string }
+        - name: w
+          in: query
+          description: "只跟 sort=week：weeks[].w 里的周号（1.16.0 起）"
+          schema: { type: integer }
       responses:
         "200":
           description: 和网页同一个动作的回答（只保证这里列出的字段；没列出的可能变化或去掉）
@@ -2323,6 +2355,17 @@ paths:
                 properties:
                   sort:
                     type: string
+                  weeks:
+                    type: array
+                    description: "只在 sort=week 时有：存过的周，新的在前（1.16.0 起）"
+                    items:
+                      type: object
+                      properties:
+                        w: { type: integer }
+                        from: { type: integer, description: "这周开始的时间（北京时间周一零点，毫秒）" }
+                  w:
+                    type: integer
+                    description: "问到一个存过的周时有（1.16.0 起）"
                   min:
                     type: integer
                   dot:
@@ -2397,6 +2440,15 @@ paths:
                           type: string
                         imgUrl:
                           type: string
+                        rank:
+                          type: integer
+                          description: "在总榜或本周榜（往周：那一周）上的名次，有名次的才有"
+                        move:
+                          type: integer
+                          description: "只在 sort=week：比上一周升了几名，降是负数（1.16.0 起）"
+                        fresh:
+                          type: boolean
+                          description: "只在 sort=week：上一周不在榜上（1.16.0 起）"
               example:
                 sort: top
                 min: 1
@@ -4922,7 +4974,22 @@ components:
       properties:
         week:
           type: integer
-          description: "只在 boards/maps?sort=week 时有：本周几人打分（1.13.0 起）"
+          description: "只在 boards/maps?sort=week 时有：本周几人打分（1.13.0 起）；问往周（w）时是那周几人打分"
+        place:
+          type: [integer, "null"]
+          description: "只在 sort=week 时有：在这一周的名次（和网页「本周」一样，这周算数的打分满 3 个才有名次，不满是 null）。rank 仍是总榜名次（1.16.0 起）"
+          example: 1
+        move:
+          type: integer
+          description: "只在 sort=week 且有 place 时可能有：比上一周升了几名（降是负数）；名次没变、或者这周或上一周上榜不满 10 张图时没有这个字段（1.16.0 起）"
+          example: 2
+        fresh:
+          type: boolean
+          description: "只在 sort=week 时可能有：上一周不在榜上，这周新上来（只会是 true，不满 10 张图时没有）（1.16.0 起）"
+        weekAvg:
+          type: number
+          description: "只在问往周（w）时有：那一周打分的平均分（网页往周显示的分数）（1.16.0 起）"
+          example: 8.7
         world:
           $ref: "#/components/schemas/World"
         name:

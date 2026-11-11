@@ -36,7 +36,7 @@
 
 | 分类 | 方法 | 路径 | 认证 | 说明 |
 | --- | --- | --- | --- | --- |
-| **地图榜** | `GET` | [`/api/v1/boards/maps`](#排行get-apiv1boardsmapslimit20) | `client` | 地图榜排行：总榜（有评分的地图，按名次排）、`sort=week` 本周榜、`sort=new` 新上榜，`limit` 1–100 |
+| **地图榜** | `GET` | [`/api/v1/boards/maps`](#排行get-apiv1boardsmapslimit20) | `client` | 地图榜排行：总榜（有评分的地图，按名次排）、`sort=week` 本周榜（`w` 看往周，带本周名次和升降）、`sort=new` 新上榜，`limit` 1–100 |
 | **地图榜** | `GET` | [`/api/v1/maps`](#查几张地图get-apiv1mapsidswrld_wrld_) | `client` | 按世界 ID 批量查几张地图（最多 20 张，只返回在榜上的） |
 | **地图榜** | `GET` | [`/api/v1/maps/{world}`](#查一张地图get-apiv1mapsworld) | `client` | 查单张地图在地图榜上的数据 |
 | **地图榜** | `GET` | [`/api/v1/maps/{world}/page`](#公开地图页get-apiv1mapsworldpage) | `client` | 和公开地图页一样：分数分布、去过的人数、房间上限、多小咕实测 |
@@ -365,6 +365,14 @@ sequenceDiagram
 
 `sort`（1.13.0 起）：不写或 `top` 是总榜；`week` 是本周榜（北京时间周一零点以后有人打分的地图，只按本周的打分排，和网页「本周」一样，每张多一个 `week`：本周几人打分）；`new` 是新上榜（所有地图，最新加的在前，还没评分的 `rank` 是 `null`）。别的值返回 `400 bad_request`。和网页地图榜的「总榜」「本周」「新上榜」一样，只是不分星池。
 
+**往周和升降**（1.16.0 起，只在 `sort=week`）：每周一零点（北京时间）把上一周的周榜存下来，以后不再变，和网页「本周」能切的往周一样。
+
+- 回答多 `weeks`：存过的周，新的在前（`[{"w": 2965, "from": 1793548800000}]`，`from` 是那周一零点）。
+- 每张图多 `place`：这一周的名次。这周算数的打分满 3 个才有名次（防刷，和网页一样），不满的排在后面、`place` 是 `null`。`rank` 仍是总榜名次。
+- 有名次的图可能多 `move`（比上一周升了几名，降是负数）或 `fresh: true`（上一周不在榜上）。名次没变时两个都没有；这一周或上一周上榜不满 10 张图时也都不给。
+- `?sort=week&w=<周号>` 看那一周：名次、`week`（那周几人打分）、`weekAvg`（那周的平均分）都是当时存下的；后来下架的图不给，别的图名次不动。回答多 `w`。没存过的周（比如本周还没结束）给本周，回答里没有 `w`；`w` 不是数字、或者不跟 `sort=week`，返回 `400 bad_request`。
+- 开放数据不分星池，往周用的是 18 岁以上星池看到的那份（网页上 16–17 岁星池有自己的一份，不在这里）。
+
 ```json
 {
   "board": "maps",
@@ -403,7 +411,13 @@ sequenceDiagram
 | `maps[].page` | `string` | 地图在星遇同频地图榜上的详情页网址 |
 | `maps[].img` | `string \| null` | 封面图网址 |
 | `maps[].hot` | `object \| null` | 热评：最热的一条短评 `{text, by, up, went}`，`by` 是「某位<星位>」，`went` 是写的人去过这张图；没有时是 `null` |
-| `maps[].week` | `integer` | 只在 `sort=week` 时有：本周几人打分（网页上的「本周 N」） |
+| `maps[].week` | `integer` | 只在 `sort=week` 时有：本周几人打分（网页上的「本周 N」）；往周是那周几人打分 |
+| `weeks` | `array` | 只在 `sort=week` 时有：存过的周 `[{w, from}]`，新的在前（1.16.0 起） |
+| `w` | `integer` | 只在 `sort=week&w=` 问到存过的周时有：给的是哪一周（1.16.0 起） |
+| `maps[].place` | `integer | null` | 只在 `sort=week` 时有：这一周的名次，算数的打分不满 3 个是 `null`（1.16.0 起） |
+| `maps[].move` | `integer` | 比上一周升了几名，降是负数；没变或不满 10 张图时没有（1.16.0 起） |
+| `maps[].fresh` | `boolean` | 上一周不在榜上时是 `true`；不满 10 张图时没有（1.16.0 起） |
+| `maps[].weekAvg` | `number` | 只在问往周时有：那一周打分的平均分（1.16.0 起） |
 
 ### 名次怎么算
 
@@ -1199,7 +1213,7 @@ sequenceDiagram
 | `POST` | `/api/v1/me/posts/{id}/report` | `safety` | 举报动态（{why}） | why：words、pic、person、other。 |
 | `POST` | `/api/v1/me/comments/{cid}/delete` | `posts.write` | 删评论 | 自己的评论，或别人在你动态下的评论。 |
 | `POST` | `/api/v1/me/comments/{cid}/report` | `safety` | 举报评论（{why}） |  |
-| `GET` | `/api/v1/me/board` | `maps` | 玩家看到的地图榜（?sort=top|week|new|went&q=） | 和网页「榜单」一样，带玩家自己的评分、去过、热评（hots）；q 搜榜上的地图名或作者。 |
+| `GET` | `/api/v1/me/board` | `maps` | 玩家看到的地图榜（?sort=top|week|new|went&q=&w=） | 和网页「榜单」一样，带玩家自己的评分、去过、热评（hots）；q 搜榜上的地图名或作者。`sort=week` 时有 `weeks`、每张图的 `move` / `fresh`，`w` 看往周（1.16.0 起，这位玩家所在星池自己的周榜）。 |
 | `POST` | `/api/v1/me/maps` | `maps.write` | 添加地图（{world}） | world 是 wrld_… 或地图链接；要过地图检查才上榜。 |
 | `GET` | `/api/v1/me/maps/{world}/page` | `maps` | 地图页（?sort=hot|new） | 分数分布、介绍、短评（最热：去过 > 已验证 > 赞）、配置、正在开的房。没有 `mutuals` 时写的人是「某位…」（见上）。 |
 | `GET` | `/api/v1/me/maps/{world}/intros` | `maps` | 这张地图的全部介绍 | 没有 `mutuals` 时写的人是「某位…」（见上）。 |

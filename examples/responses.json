@@ -2,10 +2,10 @@
   "POST /api/v1/device/code": {
     "status": 200,
     "body": {
-      "device_code": "b1e08f38f51826bef492cd4de3a949d5f02d163bb1759612",
-      "user_code": "PTHM-HE99",
+      "device_code": "5213a66f6bbd6d826ce585e0f6af67134a26dd2660046420",
+      "user_code": "4UYD-HVMS",
       "verification_uri": "https://vrcc.cc/match/?connect",
-      "verification_uri_complete": "https://vrcc.cc/match/?connect=PTHMHE99",
+      "verification_uri_complete": "https://vrcc.cc/match/?connect=4UYDHVMS",
       "expires_in": 600,
       "interval": 5,
       "scope": "profile vrchat card maps maps.rate notifications crossings mutuals today inbox link chat chat.send posts posts.write photos maps.write safety bag settings"
@@ -20,7 +20,7 @@
   "POST /api/v1/device/token": {
     "status": 200,
     "body": {
-      "access_token": "17f9ad368d26de02bbb479ee5eb0a1c9f57c93b95210a8a8",
+      "access_token": "6a2b4294853b501cf9f816a2d585b4f80414587d73e8bfc5",
       "token_type": "Bearer",
       "scope": "profile vrchat card maps maps.rate notifications crossings mutuals today inbox link chat chat.send posts posts.write photos maps.write safety bag settings",
       "me": {
@@ -54,7 +54,7 @@
           "img": "https://vrcc.cc/maps/wrld_aaaaaaaa-0000-4000-8000-0000000000a1.jpg"
         }
       ],
-      "at": 1793047368937
+      "at": 1794412873424
     }
   },
   "GET /api/v1/boards/maps?sort=week": {
@@ -63,6 +63,12 @@
       "board": "maps",
       "sort": "week",
       "min": 1,
+      "weeks": [
+        {
+          "w": 2965,
+          "from": 1793548800000
+        }
+      ],
       "maps": [
         {
           "world": "wrld_aaaaaaaa-0000-4000-8000-0000000000a1",
@@ -80,10 +86,49 @@
           "weight": "mid",
           "page": "https://vrcc.cc/maps/wrld_aaaaaaaa-0000-4000-8000-0000000000a1",
           "img": "https://vrcc.cc/maps/wrld_aaaaaaaa-0000-4000-8000-0000000000a1.jpg",
-          "week": 2
+          "week": 2,
+          "place": null
         }
       ],
-      "at": 1793047368938
+      "at": 1794412873426
+    }
+  },
+  "GET /api/v1/boards/maps?sort=week&w=": {
+    "status": 200,
+    "body": {
+      "board": "maps",
+      "sort": "week",
+      "min": 1,
+      "weeks": [
+        {
+          "w": 2965,
+          "from": 1793548800000
+        }
+      ],
+      "w": 2965,
+      "maps": [
+        {
+          "world": "wrld_aaaaaaaa-0000-4000-8000-0000000000a1",
+          "name": "星夜茶屋",
+          "author": "某位作者",
+          "hot": {
+            "text": "适合拍照",
+            "by": "某位彩蛋猎人",
+            "up": 0,
+            "went": false
+          },
+          "avg": 8.5,
+          "raters": 2,
+          "rank": 1,
+          "weight": "mid",
+          "page": "https://vrcc.cc/maps/wrld_aaaaaaaa-0000-4000-8000-0000000000a1",
+          "img": "https://vrcc.cc/maps/wrld_aaaaaaaa-0000-4000-8000-0000000000a1.jpg",
+          "week": 3,
+          "weekAvg": 8.7,
+          "place": 1
+        }
+      ],
+      "at": 1794412873430
     }
   },
   "GET /api/v1/boards/maps?sort=new": {
@@ -111,7 +156,7 @@
           "img": "https://vrcc.cc/maps/wrld_aaaaaaaa-0000-4000-8000-0000000000a1.jpg"
         }
       ],
-      "at": 1793047368940
+      "at": 1794412873433
     }
   },
   "GET /api/v1/maps": {
@@ -136,7 +181,7 @@
           "img": "https://vrcc.cc/maps/wrld_aaaaaaaa-0000-4000-8000-0000000000a1.jpg"
         }
       ],
-      "at": 1793047368941
+      "at": 1794412873435
     }
   },
   "GET /api/v1/maps/{world}": {
@@ -159,7 +204,7 @@
         "page": "https://vrcc.cc/maps/wrld_aaaaaaaa-0000-4000-8000-0000000000a1",
         "img": "https://vrcc.cc/maps/wrld_aaaaaaaa-0000-4000-8000-0000000000a1.jpg"
       },
-      "at": 1793047368943
+      "at": 1794412873436
     }
   },
   "GET /api/v1/maps/{world}/page": {
@@ -224,7 +269,7 @@
         ],
         "minutes": null
       },
-      "at": 1793047368944
+      "at": 1794412873438
     }
   },
   "GET /api/v1/announcements": {
@@ -239,7 +284,7 @@
           "body": "去过的地图都可以打 1–10 分。",
           "link": "https://vrcc.cc/match/?tab=maps",
           "cover": "https://vrcc.cc/assets/posts/maps.webp",
-          "end": 1793652168878
+          "end": 1795017673340
         }
       ]
     }
@@ -551,6 +596,76 @@
             "paper"
           ],
           "url": "https://vrcc.cc/api/v1/stickers/sprout"
+        },
+        "gvheart": {
+          "name": "心动",
+          "finishes": [
+            "resin"
+          ],
+          "url": "https://vrcc.cc/api/v1/stickers/gvheart"
+        },
+        "gvgravity": {
+          "name": "引力",
+          "finishes": [
+            "resin"
+          ],
+          "url": "https://vrcc.cc/api/v1/stickers/gvgravity"
+        },
+        "gvbinary": {
+          "name": "双星",
+          "finishes": [
+            "resin"
+          ],
+          "url": "https://vrcc.cc/api/v1/stickers/gvbinary"
+        },
+        "gvcluster": {
+          "name": "星团",
+          "finishes": [
+            "resin"
+          ],
+          "url": "https://vrcc.cc/api/v1/stickers/gvcluster"
+        },
+        "gvgalaxy": {
+          "name": "星系",
+          "finishes": [
+            "resin"
+          ],
+          "url": "https://vrcc.cc/api/v1/stickers/gvgalaxy"
+        },
+        "ms1": {
+          "name": "千星",
+          "finishes": [
+            "resin"
+          ],
+          "url": "https://vrcc.cc/api/v1/stickers/ms1"
+        },
+        "ms2": {
+          "name": "两千星",
+          "finishes": [
+            "gold"
+          ],
+          "url": "https://vrcc.cc/api/v1/stickers/ms2"
+        },
+        "ms3": {
+          "name": "五千星",
+          "finishes": [
+            "holo"
+          ],
+          "url": "https://vrcc.cc/api/v1/stickers/ms3"
+        },
+        "ms4": {
+          "name": "一万星",
+          "finishes": [
+            "glitter"
+          ],
+          "url": "https://vrcc.cc/api/v1/stickers/ms4"
+        },
+        "ms5": {
+          "name": "两万星",
+          "finishes": [
+            "paper"
+          ],
+          "url": "https://vrcc.cc/api/v1/stickers/ms5"
         }
       },
       "finishes": {
@@ -567,7 +682,7 @@
   "GET /api/v1/status": {
     "status": 200,
     "body": {
-      "at": 1793047368946,
+      "at": 1794412873440,
       "state": "ok"
     }
   },
@@ -578,7 +693,7 @@
       "items": [],
       "every": 60,
       "dot": 1,
-      "latest": 4
+      "latest": 5
     }
   },
   "GET /api/v1/me/notifications/recent": {
@@ -590,7 +705,7 @@
           "title": "星遇同频",
           "body": "有颗星连了你。",
           "url": "/match/?tab=inbox",
-          "at": 1793047368878
+          "at": 1794412873340
         }
       ],
       "read": 0
@@ -617,7 +732,7 @@
       "why": "verify",
       "me": {
         "star": 101,
-        "vrc": "Player1"
+        "vrc": null
       }
     }
   },
@@ -658,50 +773,6 @@
           "mutual": false,
           "linkedMe": true,
           "fresh": true
-        },
-        {
-          "n": 9,
-          "pos": "G1",
-          "name": "夜航员",
-          "line": "进了新世界先去找隐藏房间，找到了就招呼同伴来看。",
-          "group": "L",
-          "groupName": "聊天星群",
-          "vibe": "随场",
-          "lead": "双向",
-          "intro": "喜欢在安静的世界里散步。",
-          "about": [],
-          "common": [
-            "你们都想找人一起逛新世界",
-            "你们都常在工作日晚上在线",
-            "你们都在漫游星群"
-          ],
-          "photo": false,
-          "rating": null,
-          "star": null,
-          "verified": false,
-          "scores": {
-            "G": 50,
-            "W": 50,
-            "Z": 50,
-            "L": 50
-          },
-          "deco": null,
-          "sprout": true,
-          "why": "cross",
-          "linked": true,
-          "mutual": true,
-          "linkedMe": true,
-          "fresh": false,
-          "vrc": "玩家的 VRChat 名字",
-          "pair": {
-            "at": 1792830000000,
-            "src": "yq",
-            "mine": false,
-            "met": {
-              "at": 1792900800000,
-              "world": "天井 Skywell｜中文社区 Chinese Community"
-            }
-          }
         }
       ],
       "left": 5,
@@ -719,7 +790,7 @@
           "star": 102,
           "vrc": "Player2",
           "vrcUser": null,
-          "at": 1792874568878,
+          "at": 1794240073340,
           "rate": {
             "played": true,
             "mine": 4
@@ -739,7 +810,7 @@
         "stage": "binary",
         "gray": false,
         "months": 3,
-        "since": "2026-08"
+        "since": "2026-09"
       },
       "name": "彩蛋猎人",
       "line": "进了新世界先去找隐藏房间，找到了就招呼同伴来看。",
@@ -819,7 +890,7 @@
           "id": 3,
           "kind": "map",
           "text": "你刚去了「星夜茶馆」，给它打个分吧。",
-          "at": 1793047368878,
+          "at": 1794412873340,
           "seen": true,
           "post": null,
           "world": "wrld_aaaaaaaa-0000-4000-8000-0000000000a1"
@@ -828,7 +899,7 @@
           "id": 2,
           "kind": "yq",
           "text": "有颗星在你的星友圈动态下留了言。",
-          "at": 1793047368878,
+          "at": 1794412873340,
           "seen": false,
           "post": 1,
           "world": null
@@ -837,7 +908,7 @@
           "id": 1,
           "kind": "gift",
           "text": "一颗互相连上的星送了你一件礼物，在「我的仓库」里。",
-          "at": 1793047368878,
+          "at": 1794412873340,
           "seen": false,
           "post": null,
           "world": null
@@ -864,7 +935,7 @@
           "score": 9,
           "words": "光影很舒服",
           "wordsOk": "ok",
-          "at": 1793047368878,
+          "at": 1794412873340,
           "page": "https://vrcc.cc/maps/wrld_aaaaaaaa-0000-4000-8000-0000000000a1"
         }
       ]
@@ -914,8 +985,8 @@
       "day": "#1",
       "cards": [],
       "round": {
-        "at": 1793047368976,
-        "next": 1793126568976,
+        "at": 1794412873473,
+        "next": 1794492073473,
         "used": 0,
         "max": 6,
         "remind": false
@@ -954,7 +1025,7 @@
           },
           "deco": null,
           "sprout": true,
-          "at": 1793047368878,
+          "at": 1794412873340,
           "src": "rec",
           "linked": false,
           "mutual": false,
@@ -979,6 +1050,12 @@
           "photo": true,
           "rating": null,
           "star": 102,
+          "gravity": {
+            "stage": "binary",
+            "gray": false,
+            "months": 3,
+            "since": "2026-09"
+          },
           "verified": false,
           "scores": {
             "G": 50,
@@ -988,12 +1065,12 @@
           },
           "deco": null,
           "sprout": true,
-          "at": 1792874568878,
+          "at": 1794240073340,
           "src": "rec",
           "linked": true,
           "mutual": true,
           "pair": {
-            "at": 1792874568878,
+            "at": 1794240073340,
             "src": "rec",
             "mine": true
           },
@@ -1028,7 +1105,7 @@
       "msg": {
         "id": 2,
         "text": "周末一起去看星星吗",
-        "at": 1793047368983,
+        "at": 1794412873482,
         "kind": "chat",
         "mine": true,
         "check": "wait"
@@ -1047,12 +1124,18 @@
             "photo": true,
             "me": false,
             "mutual": true,
-            "vrc": "Player2"
+            "vrc": "Player2",
+            "gravity": {
+              "stage": "binary",
+              "gray": false,
+              "months": 3,
+              "since": "2026-09"
+            }
           },
           "last": {
             "id": 2,
             "text": "周末一起去看星星吗",
-            "at": 1793047368983,
+            "at": 1794412873482,
             "kind": "chat",
             "mine": true,
             "check": "wait"
@@ -1069,14 +1152,14 @@
         {
           "id": 1,
           "text": "好呀，几点？",
-          "at": 1793047368878,
+          "at": 1794412873340,
           "kind": "chat",
           "mine": false
         },
         {
           "id": 2,
           "text": "周末一起去看星星吗",
-          "at": 1793047368983,
+          "at": 1794412873482,
           "kind": "chat",
           "mine": true,
           "check": "wait"
@@ -1090,7 +1173,13 @@
         "photo": true,
         "me": false,
         "mutual": true,
-        "vrc": "Player2"
+        "vrc": "Player2",
+        "gravity": {
+          "stage": "binary",
+          "gray": false,
+          "months": 3,
+          "since": "2026-09"
+        }
       },
       "max": 200
     }
@@ -1104,13 +1193,13 @@
           "kind": "shot",
           "text": "今天的星星很亮",
           "vis": "all",
-          "at": 1793047368878,
+          "at": 1794412873340,
           "mine": false,
           "img": {
             "w": 4,
             "h": 3,
             "grid": null,
-            "url": "https://vrcc.cc/api/v1/img/1?client=probe-full&g=1&exp=1793047968995&sig=0ac01e5f8c247b97c43cadb2a7a15990bf007348b1d3be39a2ed613677f9d94f"
+            "url": "https://vrcc.cc/api/v1/img/1?client=probe-full&g=1&exp=1794413473499&sig=2c7ba7cb2fcdc155a8d83faa34168c595078ca84b1c7cbbdad180e60ddd19864"
           },
           "map": null,
           "lit": 0,
@@ -1120,7 +1209,7 @@
             {
               "cid": 1,
               "text": "谢谢",
-              "at": 1793047368878,
+              "at": 1794412873340,
               "who": {
                 "n": 2,
                 "name": "彩蛋猎人",
@@ -1128,7 +1217,13 @@
                 "photo": true,
                 "me": false,
                 "mutual": true,
-                "vrc": "Player2"
+                "vrc": "Player2",
+                "gravity": {
+                  "stage": "binary",
+                  "gray": false,
+                  "months": 3,
+                  "since": "2026-09"
+                }
               }
             }
           ],
@@ -1151,6 +1246,12 @@
             "photo": true,
             "rating": null,
             "star": 102,
+            "gravity": {
+              "stage": "binary",
+              "gray": false,
+              "months": 3,
+              "since": "2026-09"
+            },
             "verified": false,
             "scores": {
               "G": 50,
@@ -1191,7 +1292,7 @@
         "kind": "text",
         "text": "今天认识了新朋友",
         "vis": "all",
-        "at": 1793047368997,
+        "at": 1794412873501,
         "mine": true,
         "check": "wait",
         "img": null,
@@ -1208,9 +1309,9 @@
     "status": 200,
     "body": {
       "level": 2,
-      "at": 1793047368878,
-      "v": "1793047368878:2",
-      "url": "https://vrcc.cc/api/v1/photo/2?client=probe-full&g=1&exp=1793047969002&sig=7a2a2540d787ea1148ff0ddb3f81420d7cf6dba25caff2afad67cb5dca57c954"
+      "at": 1794412873340,
+      "v": "1794412873340:2",
+      "url": "https://vrcc.cc/api/v1/photo/2?client=probe-full&g=1&exp=1794413473506&sig=3d3b0d484cbc7d2bbca0e9d0ebab97e14d1a86e7f11f9ba255198e35abd77135"
     }
   },
   "POST /api/v1/me/posts/{id}/comments POST": {
@@ -1221,13 +1322,13 @@
         "kind": "shot",
         "text": "今天的星星很亮",
         "vis": "all",
-        "at": 1793047368878,
+        "at": 1794412873340,
         "mine": false,
         "img": {
           "w": 4,
           "h": 3,
           "grid": null,
-          "url": "https://vrcc.cc/api/v1/img/1?client=probe-full&g=1&exp=1793047969006&sig=1eebe908b8ee858fde2f3635fbe549c14029f11384a567d4833bb4face6b96a9"
+          "url": "https://vrcc.cc/api/v1/img/1?client=probe-full&g=1&exp=1794413473511&sig=fd2028f17b14f412834c58ada987770c89858e12c4b6dfd6be79464b5db8ac7e"
         },
         "map": null,
         "lit": 0,
@@ -1237,7 +1338,7 @@
           {
             "cid": 1,
             "text": "谢谢",
-            "at": 1793047368878,
+            "at": 1794412873340,
             "who": {
               "n": 2,
               "name": "彩蛋猎人",
@@ -1245,20 +1346,32 @@
               "photo": true,
               "me": false,
               "mutual": true,
-              "vrc": "Player2"
+              "vrc": "Player2",
+              "gravity": {
+                "stage": "binary",
+                "gray": false,
+                "months": 3,
+                "since": "2026-09"
+              }
             }
           },
           {
             "cid": 2,
             "text": "拍得真好",
-            "at": 1793047369004,
+            "at": 1794412873508,
             "who": {
               "n": 1,
               "name": "彩蛋猎人",
               "group": "G",
               "photo": false,
               "me": true,
-              "mutual": false
+              "mutual": false,
+              "gravity": {
+                "stage": "binary",
+                "gray": false,
+                "months": 3,
+                "since": "2026-09"
+              }
             },
             "check": "wait"
           }
@@ -1282,6 +1395,12 @@
           "photo": true,
           "rating": null,
           "star": 102,
+          "gravity": {
+            "stage": "binary",
+            "gray": false,
+            "months": 3,
+            "since": "2026-09"
+          },
           "verified": false,
           "scores": {
             "G": 50,
@@ -1300,7 +1419,7 @@
         {
           "cid": 1,
           "text": "谢谢",
-          "at": 1793047368878,
+          "at": 1794412873340,
           "who": {
             "n": 2,
             "name": "彩蛋猎人",
@@ -1308,20 +1427,32 @@
             "photo": true,
             "me": false,
             "mutual": true,
-            "vrc": "Player2"
+            "vrc": "Player2",
+            "gravity": {
+              "stage": "binary",
+              "gray": false,
+              "months": 3,
+              "since": "2026-09"
+            }
           }
         },
         {
           "cid": 2,
           "text": "拍得真好",
-          "at": 1793047369004,
+          "at": 1794412873508,
           "who": {
             "n": 1,
             "name": "彩蛋猎人",
             "group": "G",
             "photo": false,
             "me": true,
-            "mutual": false
+            "mutual": false,
+            "gravity": {
+              "stage": "binary",
+              "gray": false,
+              "months": 3,
+              "since": "2026-09"
+            }
           },
           "check": "wait"
         }
@@ -1336,13 +1467,13 @@
         "kind": "shot",
         "text": "今天的星星很亮",
         "vis": "all",
-        "at": 1793047368878,
+        "at": 1794412873340,
         "mine": false,
         "img": {
           "w": 4,
           "h": 3,
           "grid": null,
-          "url": "https://vrcc.cc/api/v1/img/1?client=probe-full&g=1&exp=1793047969011&sig=0bf09468cf618a3a982f1c7ee41eb942a22e05a9d754d3e531447a1569e34487"
+          "url": "https://vrcc.cc/api/v1/img/1?client=probe-full&g=1&exp=1794413473515&sig=c0dcd009a41184e53d5a9bde67da9c75d851afc6742862b6f3d28a319ec8e6dd"
         },
         "map": null,
         "lit": 0,
@@ -1352,7 +1483,7 @@
           {
             "cid": 1,
             "text": "谢谢",
-            "at": 1793047368878,
+            "at": 1794412873340,
             "who": {
               "n": 2,
               "name": "彩蛋猎人",
@@ -1360,20 +1491,32 @@
               "photo": true,
               "me": false,
               "mutual": true,
-              "vrc": "Player2"
+              "vrc": "Player2",
+              "gravity": {
+                "stage": "binary",
+                "gray": false,
+                "months": 3,
+                "since": "2026-09"
+              }
             }
           },
           {
             "cid": 2,
             "text": "拍得真好",
-            "at": 1793047369004,
+            "at": 1794412873508,
             "who": {
               "n": 1,
               "name": "彩蛋猎人",
               "group": "G",
               "photo": false,
               "me": true,
-              "mutual": false
+              "mutual": false,
+              "gravity": {
+                "stage": "binary",
+                "gray": false,
+                "months": 3,
+                "since": "2026-09"
+              }
             },
             "check": "wait"
           }
@@ -1397,6 +1540,12 @@
           "photo": true,
           "rating": null,
           "star": 102,
+          "gravity": {
+            "stage": "binary",
+            "gray": false,
+            "months": 3,
+            "since": "2026-09"
+          },
           "verified": false,
           "scores": {
             "G": 50,
@@ -1415,7 +1564,7 @@
         {
           "cid": 1,
           "text": "谢谢",
-          "at": 1793047368878,
+          "at": 1794412873340,
           "who": {
             "n": 2,
             "name": "彩蛋猎人",
@@ -1423,20 +1572,32 @@
             "photo": true,
             "me": false,
             "mutual": true,
-            "vrc": "Player2"
+            "vrc": "Player2",
+            "gravity": {
+              "stage": "binary",
+              "gray": false,
+              "months": 3,
+              "since": "2026-09"
+            }
           }
         },
         {
           "cid": 2,
           "text": "拍得真好",
-          "at": 1793047369004,
+          "at": 1794412873508,
           "who": {
             "n": 1,
             "name": "彩蛋猎人",
             "group": "G",
             "photo": false,
             "me": true,
-            "mutual": false
+            "mutual": false,
+            "gravity": {
+              "stage": "binary",
+              "gray": false,
+              "months": 3,
+              "since": "2026-09"
+            }
           },
           "check": "wait"
         }
@@ -1451,13 +1612,13 @@
         "kind": "shot",
         "text": "今天的星星很亮",
         "vis": "all",
-        "at": 1793047368878,
+        "at": 1794412873340,
         "mine": false,
         "img": {
           "w": 4,
           "h": 3,
           "grid": null,
-          "url": "https://vrcc.cc/api/v1/img/1?client=probe-full&g=1&exp=1793047969014&sig=87caa6c133ad818ee0b907aab8a38cbc822b913b1e9761d6687242482655b878"
+          "url": "https://vrcc.cc/api/v1/img/1?client=probe-full&g=1&exp=1794413473518&sig=0d85c102d4c46483ebadc347c20a5d0b748963af3ae18790cd2153a14bbf9ccd"
         },
         "map": null,
         "lit": 1,
@@ -1467,7 +1628,7 @@
           {
             "cid": 1,
             "text": "谢谢",
-            "at": 1793047368878,
+            "at": 1794412873340,
             "who": {
               "n": 2,
               "name": "彩蛋猎人",
@@ -1475,20 +1636,32 @@
               "photo": true,
               "me": false,
               "mutual": true,
-              "vrc": "Player2"
+              "vrc": "Player2",
+              "gravity": {
+                "stage": "binary",
+                "gray": false,
+                "months": 3,
+                "since": "2026-09"
+              }
             }
           },
           {
             "cid": 2,
             "text": "拍得真好",
-            "at": 1793047369004,
+            "at": 1794412873508,
             "who": {
               "n": 1,
               "name": "彩蛋猎人",
               "group": "G",
               "photo": false,
               "me": true,
-              "mutual": false
+              "mutual": false,
+              "gravity": {
+                "stage": "binary",
+                "gray": false,
+                "months": 3,
+                "since": "2026-09"
+              }
             },
             "check": "wait"
           }
@@ -1512,6 +1685,12 @@
           "photo": true,
           "rating": null,
           "star": 102,
+          "gravity": {
+            "stage": "binary",
+            "gray": false,
+            "months": 3,
+            "since": "2026-09"
+          },
           "verified": false,
           "scores": {
             "G": 50,
@@ -1548,7 +1727,67 @@
           "teen": true,
           "avg": 8.5,
           "raters": 2,
-          "adj": 7.38,
+          "adj": 7.18,
+          "went": 1,
+          "hot": {
+            "id": 2,
+            "text": "适合拍照",
+            "up": 0,
+            "vote": 0
+          },
+          "hots": [
+            {
+              "id": 2,
+              "text": "适合拍照",
+              "up": 0,
+              "vote": 0
+            },
+            {
+              "id": 1,
+              "text": "光影很舒服",
+              "up": 0,
+              "vote": 0,
+              "mine": true
+            }
+          ],
+          "weight": "mid",
+          "room": false,
+          "intro": "夜里人少，适合安静地坐一会儿。",
+          "rank": 1,
+          "world": "wrld_aaaaaaaa-0000-4000-8000-0000000000a1",
+          "imgUrl": "https://vrcc.cc/api/match?xdimg=wrld_aaaaaaaa-0000-4000-8000-0000000000a1"
+        }
+      ]
+    }
+  },
+  "GET /api/v1/me/board?sort=week&w=": {
+    "status": 200,
+    "body": {
+      "sort": "week",
+      "weeks": [
+        {
+          "w": 2965,
+          "from": 1793548800000
+        }
+      ],
+      "w": 2965,
+      "min": 1,
+      "dot": {
+        "maps": false,
+        "went": false
+      },
+      "maps": [
+        {
+          "id": "wrld_aaaaaaaa-0000-4000-8000-0000000000a1",
+          "name": "星夜茶屋",
+          "author": "某位作者",
+          "cap": 16,
+          "img": "/api/match?xdimg=wrld_aaaaaaaa-0000-4000-8000-0000000000a1",
+          "status": "ok",
+          "teen": true,
+          "avg": 8.7,
+          "raters": 3,
+          "adj": 7.18,
           "went": 1,
           "hot": {
             "id": 2,
@@ -1602,7 +1841,13 @@
           "photo": true,
           "me": false,
           "mutual": true,
-          "vrc": "Player2"
+          "vrc": "Player2",
+          "gravity": {
+            "stage": "binary",
+            "gray": false,
+            "months": 3,
+            "since": "2026-09"
+          }
         },
         "went": 1,
         "spread": [
@@ -1622,7 +1867,7 @@
             "standalonewindows",
             "android"
           ],
-          "at": 1793047368878,
+          "at": 1794412873340,
           "parallel": 0,
           "weight": "mid"
         },
@@ -1635,7 +1880,7 @@
         "text": "夜里人少，适合安静地坐一会儿。",
         "up": 0,
         "down": 0,
-        "at": 1793047368878,
+        "at": 1794412873340,
         "who": {
           "n": 2,
           "name": "彩蛋猎人",
@@ -1643,7 +1888,13 @@
           "photo": true,
           "me": false,
           "mutual": true,
-          "vrc": "Player2"
+          "vrc": "Player2",
+          "gravity": {
+            "stage": "binary",
+            "gray": false,
+            "months": 3,
+            "since": "2026-09"
+          }
         },
         "mine": false,
         "vote": 0,
@@ -1658,7 +1909,7 @@
           "score": 8,
           "up": 0,
           "down": 0,
-          "at": 1793047368878,
+          "at": 1794412873340,
           "who": {
             "n": 2,
             "name": "彩蛋猎人",
@@ -1666,7 +1917,13 @@
             "photo": true,
             "me": false,
             "mutual": true,
-            "vrc": "Player2"
+            "vrc": "Player2",
+            "gravity": {
+              "stage": "binary",
+              "gray": false,
+              "months": 3,
+              "since": "2026-09"
+            }
           },
           "mine": false,
           "vote": 0,
@@ -1680,14 +1937,20 @@
           "score": 9,
           "up": 0,
           "down": 0,
-          "at": 1793047368974,
+          "at": 1794412873469,
           "who": {
             "n": 1,
             "name": "彩蛋猎人",
             "group": "G",
             "photo": false,
             "me": true,
-            "mutual": false
+            "mutual": false,
+            "gravity": {
+              "stage": "binary",
+              "gray": false,
+              "months": 3,
+              "since": "2026-09"
+            }
           },
           "mine": true,
           "vote": 0,
@@ -1712,7 +1975,7 @@
           "text": "夜里人少，适合安静地坐一会儿。",
           "up": 0,
           "down": 0,
-          "at": 1793047368878,
+          "at": 1794412873340,
           "who": {
             "n": 2,
             "name": "彩蛋猎人",
@@ -1720,7 +1983,13 @@
             "photo": true,
             "me": false,
             "mutual": true,
-            "vrc": "Player2"
+            "vrc": "Player2",
+            "gravity": {
+              "stage": "binary",
+              "gray": false,
+              "months": 3,
+              "since": "2026-09"
+            }
           },
           "mine": false,
           "vote": 0,
@@ -1764,11 +2033,11 @@
         "linked": true,
         "mutual": true,
         "pair": {
-          "at": 1793047369027,
+          "at": 1794412873535,
           "src": "rec",
           "mine": false,
           "met": {
-            "at": 1793073600000,
+            "at": 1794456000000,
             "world": "星夜茶屋"
           }
         },
@@ -1798,7 +2067,7 @@
       "blocks": [
         {
           "n": 3,
-          "at": 1793047369030,
+          "at": 1794412873538,
           "vrc": "Player3",
           "name": "彩蛋猎人",
           "report": null
@@ -1904,7 +2173,13 @@
           "group": "G",
           "photo": false,
           "me": true,
-          "mutual": false
+          "mutual": false,
+          "gravity": {
+            "stage": "binary",
+            "gray": false,
+            "months": 3,
+            "since": "2026-09"
+          }
         },
         "went": 0,
         "spread": [
@@ -1955,7 +2230,13 @@
           "photo": true,
           "me": false,
           "mutual": true,
-          "vrc": "Player2"
+          "vrc": "Player2",
+          "gravity": {
+            "stage": "binary",
+            "gray": false,
+            "months": 3,
+            "since": "2026-09"
+          }
         },
         "went": 1,
         "spread": [
@@ -1975,7 +2256,7 @@
             "standalonewindows",
             "android"
           ],
-          "at": 1793047368878,
+          "at": 1794412873340,
           "parallel": 0,
           "weight": "mid"
         },
@@ -1988,7 +2269,7 @@
         "text": "夜里人少，适合安静地坐一会儿。",
         "up": 0,
         "down": 0,
-        "at": 1793047368878,
+        "at": 1794412873340,
         "who": {
           "n": 2,
           "name": "彩蛋猎人",
@@ -1996,7 +2277,13 @@
           "photo": true,
           "me": false,
           "mutual": true,
-          "vrc": "Player2"
+          "vrc": "Player2",
+          "gravity": {
+            "stage": "binary",
+            "gray": false,
+            "months": 3,
+            "since": "2026-09"
+          }
         },
         "mine": false,
         "vote": 0,
@@ -2011,7 +2298,7 @@
           "score": 8,
           "up": 1,
           "down": 0,
-          "at": 1793047368878,
+          "at": 1794412873340,
           "who": {
             "n": 2,
             "name": "彩蛋猎人",
@@ -2019,7 +2306,13 @@
             "photo": true,
             "me": false,
             "mutual": true,
-            "vrc": "Player2"
+            "vrc": "Player2",
+            "gravity": {
+              "stage": "binary",
+              "gray": false,
+              "months": 3,
+              "since": "2026-09"
+            }
           },
           "mine": false,
           "vote": 1,
@@ -2033,14 +2326,20 @@
           "score": 9,
           "up": 0,
           "down": 0,
-          "at": 1793047368974,
+          "at": 1794412873469,
           "who": {
             "n": 1,
             "name": "彩蛋猎人",
             "group": "G",
             "photo": false,
             "me": true,
-            "mutual": false
+            "mutual": false,
+            "gravity": {
+              "stage": "binary",
+              "gray": false,
+              "months": 3,
+              "since": "2026-09"
+            }
           },
           "mine": true,
           "vote": 0,
@@ -2052,14 +2351,20 @@
           "text": "雨天来的时候灯光最好看。",
           "up": 0,
           "down": 0,
-          "at": 1793047369058,
+          "at": 1794412873567,
           "who": {
             "n": 1,
             "name": "彩蛋猎人",
             "group": "G",
             "photo": false,
             "me": true,
-            "mutual": false
+            "mutual": false,
+            "gravity": {
+              "stage": "binary",
+              "gray": false,
+              "months": 3,
+              "since": "2026-09"
+            }
           },
           "mine": true,
           "vote": 0,
@@ -2095,7 +2400,13 @@
           "photo": true,
           "me": false,
           "mutual": true,
-          "vrc": "Player2"
+          "vrc": "Player2",
+          "gravity": {
+            "stage": "binary",
+            "gray": false,
+            "months": 3,
+            "since": "2026-09"
+          }
         },
         "went": 1,
         "spread": [
@@ -2115,7 +2426,7 @@
             "standalonewindows",
             "android"
           ],
-          "at": 1793047368878,
+          "at": 1794412873340,
           "parallel": 0,
           "weight": "mid"
         },
@@ -2128,7 +2439,7 @@
         "text": "夜里人少，适合安静地坐一会儿。",
         "up": 0,
         "down": 0,
-        "at": 1793047368878,
+        "at": 1794412873340,
         "who": {
           "n": 2,
           "name": "彩蛋猎人",
@@ -2136,7 +2447,13 @@
           "photo": true,
           "me": false,
           "mutual": true,
-          "vrc": "Player2"
+          "vrc": "Player2",
+          "gravity": {
+            "stage": "binary",
+            "gray": false,
+            "months": 3,
+            "since": "2026-09"
+          }
         },
         "mine": false,
         "vote": 0,
@@ -2151,7 +2468,7 @@
           "score": 8,
           "up": 1,
           "down": 0,
-          "at": 1793047368878,
+          "at": 1794412873340,
           "who": {
             "n": 2,
             "name": "彩蛋猎人",
@@ -2159,7 +2476,13 @@
             "photo": true,
             "me": false,
             "mutual": true,
-            "vrc": "Player2"
+            "vrc": "Player2",
+            "gravity": {
+              "stage": "binary",
+              "gray": false,
+              "months": 3,
+              "since": "2026-09"
+            }
           },
           "mine": false,
           "vote": 1,
@@ -2173,14 +2496,20 @@
           "score": 9,
           "up": 0,
           "down": 0,
-          "at": 1793047368974,
+          "at": 1794412873469,
           "who": {
             "n": 1,
             "name": "彩蛋猎人",
             "group": "G",
             "photo": false,
             "me": true,
-            "mutual": false
+            "mutual": false,
+            "gravity": {
+              "stage": "binary",
+              "gray": false,
+              "months": 3,
+              "since": "2026-09"
+            }
           },
           "mine": true,
           "vote": 0,
@@ -2223,7 +2552,13 @@
           "photo": true,
           "me": false,
           "mutual": true,
-          "vrc": "Player2"
+          "vrc": "Player2",
+          "gravity": {
+            "stage": "binary",
+            "gray": false,
+            "months": 3,
+            "since": "2026-09"
+          }
         },
         "went": 1,
         "spread": [
@@ -2243,7 +2578,7 @@
             "standalonewindows",
             "android"
           ],
-          "at": 1793047368878,
+          "at": 1794412873340,
           "parallel": 0,
           "weight": "mid"
         },
@@ -2256,7 +2591,7 @@
         "text": "夜里人少，适合安静地坐一会儿。",
         "up": 0,
         "down": 0,
-        "at": 1793047368878,
+        "at": 1794412873340,
         "who": {
           "n": 2,
           "name": "彩蛋猎人",
@@ -2264,7 +2599,13 @@
           "photo": true,
           "me": false,
           "mutual": true,
-          "vrc": "Player2"
+          "vrc": "Player2",
+          "gravity": {
+            "stage": "binary",
+            "gray": false,
+            "months": 3,
+            "since": "2026-09"
+          }
         },
         "mine": false,
         "vote": 0,
