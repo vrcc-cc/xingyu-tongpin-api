@@ -20,6 +20,7 @@
 - [请求规范与通用错误](#请求规范与通用错误)（[权限](#权限scope)）
 - [开放数据：地图榜](#开放数据地图榜)
 - [开放数据：模型榜](#开放数据模型榜)
+- [社团](#社团)
 - [公告和停站](#公告和停站)
 - [玩家自己的接口](#玩家自己的接口)（[设备授权](#设备授权post-apiv1devicecode)）
 - [贴纸素材](#贴纸素材)
@@ -43,6 +44,7 @@
 | **地图榜** | `GET` | [`/api/v1/maps/{world}/page`](#公开地图页get-apiv1mapsworldpage) | `client` | 和公开地图页一样：分数分布、去过的人数、房间上限、多小咕实测 |
 | **模型榜** | `GET` | [`/api/v1/boards/models`](#模型榜排行get-apiv1boardsmodelslimit20) | `client` | 模型榜排行：总榜（有人喜欢的，按名次排）、`sort=week` 本周（`w` 看往周）、`sort=new` 新上榜（1.17.0 起） |
 | **模型榜** | `GET` | [`/api/v1/models/{id}`](#查一个模型get-apiv1modelsid) | `client` | 查一个模型，带两条热评（1.17.0 起） |
+| **社团** | `GET` | [`/api/v1/clubs/{code}`](#一个社团get-apiv1clubscode) | `client` | 一个社团的公开页（`vrcc.cc/c/<短码>`）上的内容（1.18.0 起） |
 | **公告** | `GET` | [`/api/v1/announcements`](#公告和停站) | `client` | 网页上给所有玩家的公告，和停站时的说明 |
 | **素材** | `GET` | [`/api/v1/stickers`](#贴纸素材) | 无 | 所有贴纸的名字、材质和图片地址 |
 | **素材** | `GET` | [`/api/v1/stickers/{id}`](#一张贴纸get-apiv1stickersidfinwearseed) | 无 | 一张贴纸的图（SVG），按材质、磨损画 |
@@ -71,6 +73,8 @@
 | **玩家本人** | `POST` | [`/api/v1/me/chats/{n}`](#发私聊post-apiv1mechatsn) | `client` + `Bearer`（`chat.send`） | 替玩家发一条私聊（只在玩家自己点时） |
 | **玩家本人** | `GET` | [`/api/v1/me/posts`](#星友圈get-apiv1mepostsfallfriendminebefore) | `client` + `Bearer`（`posts`） | 星友圈动态 |
 | **玩家本人** | `POST` | [`/api/v1/me/posts`](#发星友圈post-apiv1meposts) | `client` + `Bearer`（`posts.write`） | 替玩家发一条文字动态（只在玩家自己点时） |
+| **玩家本人** | `GET` | [`/api/v1/me/clubs`](#玩家看到的社团get-apiv1meclubs) | `client` + `Bearer`（`clubs`） | 玩家能看到的社团列表（1.18.0 起） |
+| **玩家本人** | `GET` | [`/api/v1/me/clubs/{code}`](#一个社团的社团页get-apiv1meclubscode) | `client` + `Bearer`（`clubs`） | 一个社团的社团页：简介、公告、房间在线、下次活动（1.18.0 起） |
 | **玩家本人** | 见那一节 | [第三批的 24 个接口](#第三批举报和隐藏评论和点亮地图榜照片) | `client` + `Bearer`（`safety`、`posts`、`posts.write`、`maps`、`maps.write`、`maps.rate`、`photos`、`link`、`chat.send`） | 举报和隐藏、评论和点亮、删除和合照、玩家看到的地图榜和地图页、介绍、赞踩、添加地图、玩家照片、说一句、撤回私聊 |
 | **图片** | `GET` | `/api/v1/img/{id}`、`/api/v1/photo/{n}` | 签名链接（不用请求头） | 星友圈的图、玩家照片：用 `me/posts`、`me/stars/{n}/photo` 给的 `url`，10 分钟有效 |
 | **状态** | `GET` | [`/api/v1/status`](#运行状态) | 无 | 网站和接口现在能不能用 |
@@ -268,6 +272,7 @@ sequenceDiagram
 | `safety` | 在你操作时，举报或隐藏其他玩家和内容 | 举报、隐藏、`GET me/hidden` | | ✓ |
 | `bag` | 查看你仓库里的贴纸和星尘 | `GET me/bag` | | |
 | `settings` | 查看你的资料和隐私设置（不含邮箱和星池） | `GET me/settings` | | |
+| `clubs` | 查看社团列表和社团页（含你挂着的社团） | `GET me/clubs`、`GET me/clubs/{code}`（1.18.0 起） | | ✓ |
 
 **敏感权限只给审核过的。** 普通权限（`profile`、`card`、`maps`、`notifications`、`bag`、`settings`）谁都能要；打了 ✓ 的敏感权限只给：
 
@@ -278,7 +283,7 @@ sequenceDiagram
 
 每次调用都会再查一遍：审核被撤回，敏感接口当场回答 `403 scope_unreviewed`，`oauth/userinfo` 的 `vrc` 变成 `null`；普通接口照常能用。
 - 带「会看到其他玩家的……」的几项，同意页那一行就这么写，玩家知道你会看到别人的资料和消息。
-- **同意页列出要的每一项**，顶上写一共几项普通权限、几项敏感权限。敏感的是 `vrchat`、`maps.rate`、`crossings`、`mutuals`、`today`、`inbox`、`link`、`chat`、`chat.send`、`posts`、`posts.write`、`photos`、`maps.write`、`safety`，排在前面、标着「敏感」；超过三项的先收起，玩家点开能看全。玩家不能只同意其中几项，所以只要用得到的。
+- **同意页列出要的每一项**，顶上写一共几项普通权限、几项敏感权限。敏感的是 `vrchat`、`maps.rate`、`crossings`、`mutuals`、`today`、`inbox`、`link`、`chat`、`chat.send`、`posts`、`posts.write`、`photos`、`maps.write`、`safety`、`clubs`，排在前面、标着「敏感」；超过三项的先收起，玩家点开能看全。玩家不能只同意其中几项，所以只要用得到的。
 - 没有权限时调 `me/…`，回答 `403` `{"error": "scope", "need": "<缺的权限>"}`。
 - 改资料、注销这类账号操作没有权限，也不会有。
 
@@ -533,6 +538,88 @@ sequenceDiagram
 
 - 回答 `{"model": {…}, "hots": [{text, by, up}, …], "at": …}`。`model` 和榜上那一行一样，`hots` 是公开页上的热评（最多 2 条）。
 - 不在榜上（没过审、下榜了、只给 18 岁以上的）返回 `404 not_found`。
+
+---
+
+## 社团
+
+1.18.0 起。社团是入驻星遇同频的 VRChat 群组，只在 18 岁以上星池（16–17 岁星池没有社团）。社团名称、图片和人数来自 VRChat 群组。
+
+### 一个社团：`GET /api/v1/clubs/{code}`
+
+不用令牌，和地图榜一样带 `client`。内容和社团公开页 `https://vrcc.cc/c/<短码>` 一样（就是社团放在 VRChat 群组链接栏里的那个链接），适合社团自己的网站、机器人或世界里的展板。`{code}` 是群组短码（如 `STAR.0420`，大小写都行）。服务器最多 1 分钟更新一次。
+
+```json
+{
+  "club": {
+    "code": "STAR.0420",
+    "name": "星夜电台",
+    "lede": "每周五晚上一起听歌",
+    "tags": ["聊天", "音乐"],
+    "members": 128,
+    "here": 1,
+    "since": 2024,
+    "grade": 2,
+    "gradeName": "二等星",
+    "icon": "https://vrcc.cc/c/STAR.0420.icon.jpg?v=fc533l",
+    "banner": null,
+    "page": "https://vrcc.cc/c/STAR.0420",
+    "group": "https://vrchat.com/home/group/grp_aaaaaaaa-1111-2222-3333-444444444444"
+  }
+}
+```
+
+| 字段 | 说明 |
+| --- | --- |
+| `code`、`name` | 群组短码和名字（VRChat） |
+| `lede` | 社团写的一句话，没有时是 `null` |
+| `tags` | 标签的名字 |
+| `members` | VRChat 群组的人数，不知道时是 `null` |
+| `here` | 挂着这个社团的星有几颗（只是个数，不给是谁） |
+| `since` | 群组成立的年份，不知道时是 `null` |
+| `grade`、`gradeName` | 评级：1 三等星、2 二等星、3 一等星（按群组人数）、4 北极星；没有时都是 `null` |
+| `icon`、`banner` | 群组图标和横幅（公开页上的地址），没有时是 `null` |
+| `page` | 社团公开页 |
+| `group` | VRChat 上的群组页（「在 VRChat 加入」） |
+
+- 只有显示中、所有人可见的社团有回答；没入驻、审核中、下架、只给成员看、不展示的，一律是同样的 `404 not_found`（和公开页一样，看不出是哪一种）。
+- 不给挂着这个社团的是谁、简介、公告、海报、动态，这些只在星遇同频里看得到（下面的玩家接口有简介和公告）。
+
+### 玩家看到的社团：`GET /api/v1/me/clubs`
+
+**需要权限 `clubs`（敏感，只给审核过的客户端）。** 和网页「星友圈 → 社团」一样，这位玩家所在星池里、TA 能看到的社团（包括只给成员看、TA 挂着的）。只读，不会算进社团的曝光数，也不会消掉网页上「社团」的红点。
+
+```json
+{
+  "clubs": [
+    { "code": "STAR.0420", "name": "星夜电台", "lede": "每周五晚上一起听歌", "tags": ["聊天", "音乐"], "langs": ["中文"], "members": 128, "here": 1, "since": 2024,
+      "grade": 2, "gradeName": "二等星", "icon": "https://vrcc.cc/c/STAR.0420.icon.jpg?v=fc533l", "banner": null, "page": "https://vrcc.cc/c/STAR.0420",
+      "group": "https://vrchat.com/home/group/grp_…", "likes": 0, "room": false, "event": false, "followed": true, "member": true }
+  ],
+  "mine": ["STAR.0420"]
+}
+```
+
+- 每个社团在上面那些字段之外多：`langs`（社团说的语言）、`likes`（点赞数，验证过 VRChat 的星点的）、`room`（现在有公开房间在线）、`event`（有还没结束的公开活动）、`followed`（玩家关注了）、`member`（玩家挂着）。
+- `mine`：玩家挂着的社团短码，按挂上的先后。
+- 顺序：点赞多的在前，再按群组人数（网页上每天换一次顺序，这里不换）。
+- 只给成员看的社团没有图片地址，`icon`、`banner`、`page` 是 `null`。
+- 16–17 岁星池的玩家、社团功能关着时，回答 `404` `{"error": "club_off"}`。
+- 每次算第二份读里的一次（每天 1000 次）。
+
+### 一个社团的社团页：`GET /api/v1/me/clubs/{code}`
+
+**需要权限 `clubs`。** 回答 `{"club": {…}}`：列表里那一行，再加：
+
+| 字段 | 说明 |
+| --- | --- |
+| `intro` | 群组简介（审核过的），分成几段：`[[文字, 0], [联系方式, 1], …]`，`1` 的那段网页上打码，点了才显示，请照样处理；没有时是 `null` |
+| `notice` | 社团公告 `{segs, until}`，`segs` 同上，`until` 是到哪天为止（毫秒）；没有时是 `null` |
+| `rooms` | 正在开的公开房间 `[{map, users, cap, link}]`：地图名（地图榜审核过的才有，否则 `null`）、几人、上限、在 VRChat 打开的链接 |
+| `events` | 下次活动（VRChat 群组日历上的公开活动，标题审核过）`[{title, at, ends, link}]`，最多 3 个 |
+
+- 玩家看不到的社团（不在 TA 的星池、只给成员看但 TA 没挂、不展示、下架），回答 `404` `{"error": "club_gone"}`。
+- 不给挂着这个社团的星、海报、带上这个社团的动态、社团管理的东西。
 
 ---
 
@@ -1599,7 +1686,7 @@ curl -H "X-Client: app_0123456789abcdef" -H "Authorization: Bearer <access_token
 | **贴纸素材（`/stickers`）** | 每个网络地址每分钟 **600 次**，单独计算 |
 | **轮询提醒（`/me/notifications`）** | 每个授权两次之间**至少 25 秒**，建议按返回的 `every`（60 秒）；只在 VRChat 开着时问 |
 | **读，第一份** | 最近的提醒、星轨相交、互相连上、所在的地图、我打过分的地图：每个授权每天 **1000 次**（各客户端分开算） |
-| **读，第二份**（和上面分开算） | 今天的星、连向我、星轨相交的完整星卡、私聊列表和记录、星友圈、评论、玩家照片、地图榜和地图页、全部介绍、隐藏列表、通知中心：每个授权每天 **1000 次**。签名图片每打开一次也算一次，所以一张玩家照片是两次（拿链接一次、打开一次） |
+| **读，第二份**（和上面分开算） | 今天的星、连向我、星轨相交的完整星卡、私聊列表和记录、星友圈、评论、玩家照片、地图榜和地图页、全部介绍、隐藏列表、通知中心、社团：每个授权每天 **1000 次**。签名图片每打开一次也算一次，所以一张玩家照片是两次（拿链接一次、打开一次） |
 | **未读数（`/me/unread`）** | 每个授权每天 **1500 次**，单独计算 |
 | **没有每天上限的** | `me/card`、`me/bag`、`me/settings`；轮询提醒（只有 25 秒间隔）；开放数据 |
 | **设备授权拿码（`/device/code`）** | 每个网络地址每天 **30 个** |
@@ -1608,7 +1695,7 @@ curl -H "X-Client: app_0123456789abcdef" -H "Authorization: Bearer <access_token
 | **连接码（`/connect`）** | 每个网络地址每天 **30 次** |
 | **用星遇同频登录（玩家点「继续」）** | 每位玩家每天 **100 次** |
 | **打分（`/me/maps/{world}/rating`）** | 和网页地图榜共用每天的打分与添图次数 |
-| **开放数据（地图榜、模型榜）** | 服务器最多 **5 分钟**更新一次，问得再勤也是同一份 |
+| **开放数据（地图榜、模型榜）** | 服务器最多 **5 分钟**更新一次，问得再勤也是同一份；社团（`clubs/{code}`）最多 1 分钟 |
 | **写，每个授权每天** | 连线和说一句合计 **20**；私聊和撤回合计 **100**；发星友圈 **5**；各种举报合计 **10**；隐藏和恢复合计 **50**；评论 **50**；点亮 **200**；各种删除和合照合计 **50**；地图赞踩 **200**；添加地图 **10**；写介绍 **10**。网页自己的上限照样算 |
 
 ---

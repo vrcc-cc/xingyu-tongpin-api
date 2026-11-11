@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: "星遇同频 · 开放接口 (Open API v1)"
-  version: "1.17.0"
+  version: "1.18.0"
   summary: "VRChat 中文社区「星遇同频」开放数据与第三方客户端接口"
   description: |
     [星遇同频](https://vrcc.cc/match/) 的官方开放接口，基础地址为 `https://vrcc.cc/api/v1/`。
@@ -42,6 +42,7 @@ info:
     | `safety` | 在你操作时，举报或隐藏其他玩家和内容 | 举报、隐藏、`GET /me/hidden` | | ✓ |
     | `bag` | 查看你仓库里的贴纸和星尘 | `GET /me/bag` | | |
     | `settings` | 查看你的资料和隐私设置（不含邮箱和星池） | `GET /me/settings` | | |
+    | `clubs` | 查看社团列表和社团页（含你挂着的社团） | `GET /me/clubs`、`GET /me/clubs/{code}`（1.18.0 起） | | ✓ |
 
     **敏感权限只给审核过的。** 普通权限（`profile` `card` `maps` `notifications` `bag` `settings`）都能要；敏感权限：
 
@@ -108,6 +109,9 @@ tags:
   - name: "开放数据 · 模型榜"
     description: |
       和 vrcc.cc/models/ 一样的模型榜公开数据（1.17.0 起），用法同地图榜。模型的名称、店铺、价格和封面来自 BOOTH。
+  - name: "社团"
+    description: |
+      入驻星遇同频的 VRChat 群组（1.18.0 起），只在 18 岁以上星池。clubs/{code} 和社团公开页一样，不用令牌；me/clubs 要权限 clubs（敏感）。
   - name: "贴纸素材"
     description: |
       星卡上的贴纸，照网页的样子画。不用 `client`、不用令牌。只用来显示玩家星卡上的贴纸，不要当应用图标、表情包或单独售卖。
@@ -365,6 +369,130 @@ paths:
           $ref: "#/components/responses/ClientError"
         default:
           $ref: "#/components/responses/Error"
+
+  /clubs/{code}:
+    get:
+      tags: ["社团"]
+      summary: "一个社团（公开页）"
+      operationId: getClub
+      description: "和 vrcc.cc/c/<短码> 一样（1.18.0 起）。只有显示中、所有人可见的社团有回答，其他一律同样的 404 not_found。服务器最多 1 分钟更新一次。"
+      security:
+        - client: []
+        - clientQuery: []
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: "群组短码，如 STAR.0420（大小写都行）"
+          schema: { type: string, pattern: "^[A-Za-z0-9]{3,6}\\.\\d{4}$" }
+      responses:
+        '200':
+          description: "一个社团"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  club:
+                    $ref: "#/components/schemas/Club"
+        '404':
+          description: "没有这个社团，或者不是所有人可见（not_found）"
+        '403':
+          $ref: "#/components/responses/ClientError"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /me/clubs:
+    get:
+      tags: ["社团"]
+      summary: "玩家看到的社团"
+      operationId: getMyClubs
+      description: |
+        **需要权限 `clubs`（敏感）。** 和网页「社团」列表一样，玩家所在星池里 TA 能看到的社团（1.18.0 起）。只读：不算曝光、不消红点。点赞多的在前，再按群组人数。16–17 岁星池、社团功能关着时 404 club_off。算第二份读（每天 1000 次）。
+      security:
+        - client: []
+          token: []
+      responses:
+        '200':
+          description: "社团列表"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  clubs:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/MyClub"
+                  mine:
+                    type: array
+                    description: "玩家挂着的社团短码，按挂上的先后"
+                    items: { type: string }
+        "403": { description: "权限不够（scope / scope_unreviewed）" }
+        "404": { description: "club_off：16–17 岁星池，或社团功能关着" }
+        "429": { description: "今天的次数用完了" }
+
+  /me/clubs/{code}:
+    get:
+      tags: ["社团"]
+      summary: "一个社团的社团页"
+      operationId: getMyClub
+      description: |
+        **需要权限 `clubs`（敏感）。** 列表那一行，加简介、公告、正在开的公开房间、下次活动（1.18.0 起）。玩家看不到的社团 404 club_gone。
+      security:
+        - client: []
+          token: []
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: "社团页"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  club:
+                    allOf:
+                      - $ref: "#/components/schemas/MyClub"
+                      - type: object
+                        properties:
+                          intro:
+                            description: "群组简介：[[文字, 0], [联系方式, 1], …]，1 的那段请打码；没有时是 null"
+                            type: [array, "null"]
+                            items: { type: array }
+                          notice:
+                            description: "社团公告；没有时是 null"
+                            oneOf:
+                              - type: object
+                                properties:
+                                  segs: { type: array, items: { type: array } }
+                                  until: { type: integer, description: "到什么时候（毫秒）" }
+                              - type: "null"
+                          rooms:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                map: { type: [string, "null"], description: "地图名（地图榜审核过的才有）" }
+                                users: { type: [integer, "null"] }
+                                cap: { type: [integer, "null"] }
+                                link: { type: string, description: "在 VRChat 打开" }
+                          events:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                title: { type: string }
+                                at: { type: integer }
+                                ends: { type: integer }
+                                link: { type: string }
+        "403": { description: "权限不够（scope / scope_unreviewed）" }
+        "404": { description: "club_gone：看不到这个社团；club_off：16–17 岁星池或社团功能关着" }
+        "429": { description: "今天的次数用完了" }
 
   /maps:
     get:
@@ -4508,6 +4636,7 @@ components:
             safety: "在你操作时，举报或隐藏其他玩家和内容：举报、隐藏、GET /me/hidden"
             bag: "查看你仓库里的贴纸和星尘：GET /me/bag"
             settings: "查看你的资料和隐私设置（不含邮箱和星池）：GET /me/settings"
+            clubs: "查看社团列表和社团页（含你挂着的社团）：GET /me/clubs、GET /me/clubs/{code}（敏感）"
 
   responses:
     ClientError:
@@ -4631,8 +4760,8 @@ components:
       type: string
       description: |
         空格分隔的权限（请求时也接受逗号或 `+`），返回时按固定顺序、`profile` 在最前：
-        `profile` `vrchat` `card` `maps` `maps.rate` `notifications` `crossings` `mutuals` `today` `inbox` `link` `chat` `chat.send` `posts` `posts.write` `photos` `maps.write` `safety` `bag` `settings`。
-        敏感权限（`vrchat` `maps.rate` `crossings` `mutuals` `today` `inbox` `link` `chat` `chat.send` `posts` `posts.write` `photos` `maps.write` `safety`）只给开 Issue 登记的客户端与审核通过的应用（未审核的应用只有登记人能同意）；`dev-` 只能要普通权限。省略时：登记客户端为 `profile notifications crossings mutuals maps maps.rate`，`dev-` 为 `profile notifications maps`，自助登记的应用只有 `profile`。
+        `profile` `vrchat` `card` `maps` `maps.rate` `notifications` `crossings` `mutuals` `today` `inbox` `link` `chat` `chat.send` `posts` `posts.write` `photos` `maps.write` `safety` `bag` `settings` `clubs`。
+        敏感权限（`vrchat` `maps.rate` `crossings` `mutuals` `today` `inbox` `link` `chat` `chat.send` `posts` `posts.write` `photos` `maps.write` `safety` `clubs`）只给开 Issue 登记的客户端与审核通过的应用（未审核的应用只有登记人能同意）；`dev-` 只能要普通权限。省略时：登记客户端为 `profile notifications crossings mutuals maps maps.rate`，`dev-` 为 `profile notifications maps`，自助登记的应用只有 `profile`。
       example: "profile notifications maps maps.rate"
 
     Card:
@@ -5166,6 +5295,34 @@ components:
         text: { type: string, example: "表情很多，换装方便" }
         by: { type: string, description: "某位<星位>", example: "某位彩蛋猎人" }
         up: { type: integer, description: "赞的数量" }
+
+    Club:
+      type: object
+      properties:
+        code: { type: string, example: "STAR.0420" }
+        name: { type: string }
+        lede: { type: [string, "null"], description: "一句话" }
+        tags: { type: array, items: { type: string } }
+        members: { type: [integer, "null"], description: "VRChat 群组人数" }
+        here: { type: integer, description: "挂着这个社团的星有几颗" }
+        since: { type: [integer, "null"], description: "群组成立年份" }
+        grade: { type: [integer, "null"], description: "评级：1 三等星、2 二等星、3 一等星、4 北极星" }
+        gradeName: { type: [string, "null"] }
+        icon: { type: [string, "null"] }
+        banner: { type: [string, "null"] }
+        page: { type: [string, "null"], description: "社团公开页；只给成员看的社团是 null" }
+        group: { type: string, description: "VRChat 上的群组页" }
+    MyClub:
+      allOf:
+        - $ref: "#/components/schemas/Club"
+        - type: object
+          properties:
+            langs: { type: array, items: { type: string }, description: "社团说的语言" }
+            likes: { type: integer, description: "点赞数（验证过 VRChat 的星点的）" }
+            room: { type: boolean, description: "现在有公开房间在线" }
+            event: { type: boolean, description: "有还没结束的公开活动" }
+            followed: { type: boolean }
+            member: { type: boolean, description: "玩家挂着这个社团" }
 
     MyMap:
       type: object
