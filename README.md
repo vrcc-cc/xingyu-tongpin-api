@@ -8,7 +8,7 @@
 
 | 类别 | 是否需要令牌 | 适用场景 | 数据范围 |
 | --- | --- | --- | --- |
-| **开放数据** | 不用登录（仅需 `client` 标识） | VRChat 世界里的地图榜组件、社区网站、机器人 | 和公开的 [地图榜页面](https://vrcc.cc/maps/) 一样：过审地图、平均分、几人评分、名次、性能轻重（不含谁打的分和短评） |
+| **开放数据** | 不用登录（仅需 `client` 标识） | VRChat 世界里的地图榜组件、社区网站、机器人 | 和公开的 [地图榜页面](https://vrcc.cc/maps/)、[模型榜页面](https://vrcc.cc/models/) 一样：过审地图、平均分、几人评分、名次、性能轻重；模型的喜欢数和名次（不含谁打的分、谁喜欢，短评只有热评） |
 | **玩家自己的** | 需要令牌（`Authorization: Bearer`），玩家用**设备授权**同意后拿到 | 桌面客户端（如官方 [VRCX 脚本](https://github.com/vrcc-cc/xingyu-tongpin-vrcx)、VRCX 分支、Tauri 工具） | 只给这位玩家本人，按玩家同意的[权限](#权限scope)：收提醒、看星轨相交和互相连上的星、看星卡、看和打地图评分、今天的星、连向我、连线、私聊、星友圈 |
 | **用星遇同频登录** | 网站自己登记拿 `client_id`，玩家点「继续」后拿到令牌 | 想让玩家「用星遇同频登录」的网站（像 Google 登录那样） | 默认只给这个网站专用的编号和星号；按要的[权限](#权限scope)还能给更多（星卡、地图评分、提醒；VRChat 账号、私聊这类敏感权限要先[审核](#申请审核)） |
 
@@ -19,6 +19,7 @@
 - [快速开始与接入流程](#快速开始与接入流程)
 - [请求规范与通用错误](#请求规范与通用错误)（[权限](#权限scope)）
 - [开放数据：地图榜](#开放数据地图榜)
+- [开放数据：模型榜](#开放数据模型榜)
 - [公告和停站](#公告和停站)
 - [玩家自己的接口](#玩家自己的接口)（[设备授权](#设备授权post-apiv1devicecode)）
 - [贴纸素材](#贴纸素材)
@@ -40,6 +41,8 @@
 | **地图榜** | `GET` | [`/api/v1/maps`](#查几张地图get-apiv1mapsidswrld_wrld_) | `client` | 按世界 ID 批量查几张地图（最多 20 张，只返回在榜上的） |
 | **地图榜** | `GET` | [`/api/v1/maps/{world}`](#查一张地图get-apiv1mapsworld) | `client` | 查单张地图在地图榜上的数据 |
 | **地图榜** | `GET` | [`/api/v1/maps/{world}/page`](#公开地图页get-apiv1mapsworldpage) | `client` | 和公开地图页一样：分数分布、去过的人数、房间上限、多小咕实测 |
+| **模型榜** | `GET` | [`/api/v1/boards/models`](#模型榜排行get-apiv1boardsmodelslimit20) | `client` | 模型榜排行：总榜（有人喜欢的，按名次排）、`sort=week` 本周（`w` 看往周）、`sort=new` 新上榜（1.17.0 起） |
+| **模型榜** | `GET` | [`/api/v1/models/{id}`](#查一个模型get-apiv1modelsid) | `client` | 查一个模型，带两条热评（1.17.0 起） |
 | **公告** | `GET` | [`/api/v1/announcements`](#公告和停站) | `client` | 网页上给所有玩家的公告，和停站时的说明 |
 | **素材** | `GET` | [`/api/v1/stickers`](#贴纸素材) | 无 | 所有贴纸的名字、材质和图片地址 |
 | **素材** | `GET` | [`/api/v1/stickers/{id}`](#一张贴纸get-apiv1stickersidfinwearseed) | 无 | 一张贴纸的图（SVG），按材质、磨损画 |
@@ -470,6 +473,66 @@ sequenceDiagram
 
 - 短评和介绍不给（只有星遇同频里才看得到），热评就是 `map.hot`，署名「某位…」。
 - 不在榜上或没通过审核返回 `404 not_found`。服务器最多 5 分钟更新一次。
+
+---
+
+## 开放数据：模型榜
+
+1.17.0 起。数据和 [vrcc.cc/models/](https://vrcc.cc/models/) 一样：BOOTH 上的 VRChat 本体模型，玩家每人每天投一票「喜欢」。只有所有星池都能看到的模型（通过审核、没下榜、不是只给 18 岁以上的）。不给谁喜欢了、谁添加的、玩家起的叫法；短评只有热评（署名「某位<星位>」）。服务器边缘缓存最多 5 分钟更新一次。模型的名称、店铺、价格和封面来自 BOOTH，显示时请注明。
+
+### 模型榜排行：`GET /api/v1/boards/models?limit=20`
+
+`limit` 和地图榜一样（1–100，默认 20）。`sort`：不写或 `top` 是总榜（有人喜欢的，按名次排：喜欢多的在前，一样多时本周多的在前，再一样新加的在前）；`week` 是本周（北京时间周一零点以后有人喜欢的，按本周的喜欢排）；`new` 是新上榜（全部，最新加的在前，没人喜欢的 `rank` 是 `null`）。别的值返回 `400 bad_request`。
+
+`sort=week` 的 `weeks`、`w`、`place`、`move`、`fresh` 和地图榜的[往周和升降](#排行get-apiv1boardsmapslimit20)一样：本周喜欢满 3 个才有名次，往周是周一零点存下的样子。模型榜的往周用的是所有星池都能看到的那份。往周里 `week` 是那一周的喜欢数；模型榜没有 `weekAvg`。
+
+```json
+{
+  "board": "models",
+  "sort": "top",
+  "at": 1792830000000,
+  "models": [
+    {
+      "id": 5381000,
+      "name": "オリジナル3Dモデル「真冬」",
+      "short": "Mafuyu 真冬",
+      "shop": "Studio Shiori",
+      "price": "¥ 6,000",
+      "likes": 12,
+      "week": 3,
+      "rank": 1,
+      "page": "https://vrcc.cc/models/5381000",
+      "img": "https://vrcc.cc/models/5381000.jpg",
+      "booth": "https://booth.pm/ja/items/5381000",
+      "hot": { "text": "表情很多，换装方便", "by": "某位彩蛋猎人", "up": 2 }
+    }
+  ]
+}
+```
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `board` | `string` | 固定为 `"models"` |
+| `sort` | `string` | 这次用的排序：`top`、`week` 或 `new` |
+| `at` | `integer` | 这份榜单生成的时间（毫秒时间戳） |
+| `models[].id` | `integer` | BOOTH 商品编号 |
+| `models[].name` | `string` | BOOTH 上的商品名（原文） |
+| `models[].short` | `string \| null` | 简称（网页上显示的名字，有英文写法时英文在前）；没有时是 `null`，显示 `name` |
+| `models[].shop` | `string \| null` | BOOTH 店铺名 |
+| `models[].price` | `string \| null` | BOOTH 上写的价格（原文） |
+| `models[].likes` | `integer` | 一共几个喜欢 |
+| `models[].week` | `integer` | 本周几个喜欢；问往周时是那一周的 |
+| `models[].rank` | `integer \| null` | 总榜名次（没人喜欢时是 `null`） |
+| `models[].page` | `string` | 模型在星遇同频模型榜上的公开页 |
+| `models[].img` | `string` | 封面图（来自 BOOTH） |
+| `models[].booth` | `string` | BOOTH 上的商品页 |
+| `models[].hot` | `object \| null` | 热评：赞最多的一条短评 `{text, by, up}`，`by` 是「某位<星位>」；没有时是 `null` |
+| `weeks`、`w`、`models[].place`、`models[].move`、`models[].fresh` | | 只在 `sort=week`，同地图榜 |
+
+### 查一个模型：`GET /api/v1/models/{id}`
+
+- 回答 `{"model": {…}, "hots": [{text, by, up}, …], "at": …}`。`model` 和榜上那一行一样，`hots` 是公开页上的热评（最多 2 条）。
+- 不在榜上（没过审、下榜了、只给 18 岁以上的）返回 `404 not_found`。
 
 ---
 
@@ -1496,7 +1559,7 @@ curl -H "X-Client: app_0123456789abcdef" -H "Authorization: Bearer <access_token
 | `me/notifications` | `?since=<上次的 last>` | 5 条 |
 | `me/chats/{n}` | `?before=<id>` 往前、`?after=<id>` 往后、`?since=<id>`；回答 `more` 表示前面还有 | 一页 |
 | `me/posts` | `?before=<上一页最后一条的 id>`；回答 `page` 是每页条数 | `page` 条 |
-| `boards/maps` | `?limit=`（1–100） | 100 |
+| `boards/maps`、`boards/models` | `?limit=`（1–100） | 100 |
 | `me/inbox`、`me/mutuals`、`me/maps` | 不能翻页 | 200 |
 | `me/hidden` | 不能翻页 | 300 |
 | `me/notes` | 不能翻页 | 60 |
@@ -1545,7 +1608,7 @@ curl -H "X-Client: app_0123456789abcdef" -H "Authorization: Bearer <access_token
 | **连接码（`/connect`）** | 每个网络地址每天 **30 次** |
 | **用星遇同频登录（玩家点「继续」）** | 每位玩家每天 **100 次** |
 | **打分（`/me/maps/{world}/rating`）** | 和网页地图榜共用每天的打分与添图次数 |
-| **开放数据（地图榜）** | 服务器最多 **5 分钟**更新一次，问得再勤也是同一份 |
+| **开放数据（地图榜、模型榜）** | 服务器最多 **5 分钟**更新一次，问得再勤也是同一份 |
 | **写，每个授权每天** | 连线和说一句合计 **20**；私聊和撤回合计 **100**；发星友圈 **5**；各种举报合计 **10**；隐藏和恢复合计 **50**；评论 **50**；点亮 **200**；各种删除和合照合计 **50**；地图赞踩 **200**；添加地图 **10**；写介绍 **10**。网页自己的上限照样算 |
 
 ---

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: "星遇同频 · 开放接口 (Open API v1)"
-  version: "1.16.0"
+  version: "1.17.0"
   summary: "VRChat 中文社区「星遇同频」开放数据与第三方客户端接口"
   description: |
     [星遇同频](https://vrcc.cc/match/) 的官方开放接口，基础地址为 `https://vrcc.cc/api/v1/`。
@@ -105,6 +105,9 @@ tags:
     description: |
       所有人可见的地图榜公开数据，无需登录令牌。每次请求需携带 `X-Client` 请求头（或在 URL 中附加 `?client=`，方便 VRChat Udon `VRCStringDownloader` 调用）。
       服务器边缘缓存最长 5 分钟更新一次。
+  - name: "开放数据 · 模型榜"
+    description: |
+      和 vrcc.cc/models/ 一样的模型榜公开数据（1.17.0 起），用法同地图榜。模型的名称、店铺、价格和封面来自 BOOTH。
   - name: "贴纸素材"
     description: |
       星卡上的贴纸，照网页的样子画。不用 `client`、不用令牌。只用来显示玩家星卡上的贴纸，不要当应用图标、表情包或单独售卖。
@@ -262,6 +265,104 @@ paths:
           $ref: "#/components/responses/ClientError"
         '429':
           $ref: "#/components/responses/RateLimitError"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /boards/models:
+    get:
+      tags: ["开放数据 · 模型榜"]
+      summary: "获取模型榜排行"
+      operationId: getModelsBoard
+      description: |
+        和 vrcc.cc/models/ 一样（1.17.0 起）：BOOTH 上的 VRChat 本体模型，玩家每天投一票喜欢。只有所有星池都能看到的模型；不给谁喜欢了、谁添加的、叫法；短评只有热评（某位<星位>）。服务器最多 5 分钟更新一次。
+      security:
+        - client: []
+        - clientQuery: []
+      parameters:
+        - name: limit
+          in: query
+          description: "返回条数（1–100，默认 20）"
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - name: sort
+          in: query
+          description: "top 总榜（默认，有人喜欢的）；week 本周（周一零点以后有人喜欢的）；new 新上榜（全部，最新加的在前）。别的值返回 400"
+          schema: { type: string, enum: [top, week, new], default: top }
+        - name: w
+          in: query
+          description: "只能跟 sort=week：看哪一周（weeks[].w），同 boards/maps"
+          schema: { type: integer, minimum: 0 }
+        - name: client
+          in: query
+          description: "客户端标识（仅在无法发送 X-Client 请求头时使用）"
+          schema: { type: string }
+      responses:
+        '200':
+          description: "模型榜排行"
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [board, sort, at, models]
+                properties:
+                  board: { type: string, const: "models" }
+                  sort: { type: string, enum: [top, week, new] }
+                  weeks:
+                    type: array
+                    description: "只在 sort=week 时有：存过的周，新的在前"
+                    items:
+                      type: object
+                      properties:
+                        w: { type: integer }
+                        from: { type: integer, description: "这周开始的时间（北京时间周一零点，毫秒）" }
+                  w: { type: integer, description: "只在 sort=week&w= 问到存过的周时有" }
+                  at: { type: integer, description: "榜单生成时间（毫秒时间戳）" }
+                  models:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/BoardModel"
+        '400':
+          description: "sort 或 w 不对（bad_request）"
+        '403':
+          $ref: "#/components/responses/ClientError"
+        '429':
+          $ref: "#/components/responses/RateLimitError"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /models/{id}:
+    get:
+      tags: ["开放数据 · 模型榜"]
+      summary: "查一个模型"
+      operationId: getModel
+      description: "榜上那一行和公开页上的热评（最多 2 条）（1.17.0 起）。不在榜上返回 404 not_found。"
+      security:
+        - client: []
+        - clientQuery: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "BOOTH 商品编号"
+          schema: { type: integer }
+      responses:
+        '200':
+          description: "一个模型"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  model:
+                    $ref: "#/components/schemas/BoardModel"
+                  hots:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ModelHot"
+                  at: { type: integer }
+        '404':
+          description: "不在榜上（not_found）"
+        '403':
+          $ref: "#/components/responses/ClientError"
         default:
           $ref: "#/components/responses/Error"
 
@@ -5035,6 +5136,36 @@ components:
                 up: { type: integer, description: "赞的数量", example: 3 }
                 went: { type: boolean, description: "写的人去过这张图" }
             - type: "null"
+
+    BoardModel:
+      type: object
+      required: [id, name, short, shop, price, likes, week, rank, page, img, booth, hot]
+      properties:
+        id: { type: integer, description: "BOOTH 商品编号", example: 5381000 }
+        name: { type: string, description: "BOOTH 上的商品名（原文）" }
+        short: { type: [string, "null"], description: "简称（网页显示的名字）；没有时显示 name" }
+        shop: { type: [string, "null"], description: "BOOTH 店铺名" }
+        price: { type: [string, "null"], description: "BOOTH 上写的价格（原文）" }
+        likes: { type: integer, description: "一共几个喜欢" }
+        week: { type: integer, description: "本周几个喜欢；问往周时是那一周的" }
+        rank: { type: [integer, "null"], description: "总榜名次（没人喜欢时是 null）" }
+        page: { type: string, description: "星遇同频模型榜上的公开页" }
+        img: { type: string, description: "封面图（来自 BOOTH）" }
+        booth: { type: string, description: "BOOTH 商品页" }
+        hot:
+          description: "热评：赞最多的一条短评，没有时是 null"
+          oneOf:
+            - $ref: "#/components/schemas/ModelHot"
+            - type: "null"
+        place: { type: [integer, "null"], description: "只在 sort=week：这一周的名次（喜欢满 3 个才有）" }
+        move: { type: integer, description: "只在 sort=week：比上一周升了几名，降是负数" }
+        fresh: { type: boolean, description: "只在 sort=week：上一周不在榜上" }
+    ModelHot:
+      type: object
+      properties:
+        text: { type: string, example: "表情很多，换装方便" }
+        by: { type: string, description: "某位<星位>", example: "某位彩蛋猎人" }
+        up: { type: integer, description: "赞的数量" }
 
     MyMap:
       type: object
