@@ -44,6 +44,7 @@
 | **地图榜** | `GET` | [`/api/v1/maps/{world}/page`](#公开地图页get-apiv1mapsworldpage) | `client` | 和公开地图页一样：分数分布、去过的人数、房间上限、多小咕实测 |
 | **模型榜** | `GET` | [`/api/v1/boards/models`](#模型榜排行get-apiv1boardsmodelslimit20) | `client` | 模型榜排行：总榜（有人喜欢的，按名次排）、`sort=week` 本周（`w` 看往周）、`sort=new` 新上榜（1.17.0 起） |
 | **模型榜** | `GET` | [`/api/v1/models/{id}`](#查一个模型get-apiv1modelsid) | `client` | 查一个模型，带两条热评（1.17.0 起） |
+| **社团** | `GET` | [`/api/v1/clubs`](#公开的社团列表get-apiv1clubslimit20) | `client` | 所有公开的社团（所有人可见的），字段和 `clubs/{code}` 一样，`limit` 1–100（1.19.2 起） |
 | **社团** | `GET` | [`/api/v1/clubs/{code}`](#一个社团get-apiv1clubscode) | `client` | 一个社团的公开页（`vrcc.cc/c/<短码>`）上的内容（1.18.0 起） |
 | **公告** | `GET` | [`/api/v1/announcements`](#公告和停站) | `client` | 网页上给所有玩家的公告，和停站时的说明 |
 | **素材** | `GET` | [`/api/v1/stickers`](#贴纸素材) | 无 | 所有贴纸的名字、材质和图片地址 |
@@ -244,7 +245,25 @@ sequenceDiagram
 - **方法**：只认 `GET`、`POST`；开放数据和 `status` 也认 `HEAD`（玩家自己的接口每次都算次数，不认 `HEAD`）。路径对、方法不对，回答 `405 {"error": "method"}`，`Allow` 头写着这个路径能用哪些方法。
 - **时间**：时间戳都是毫秒；`expires_in`、`interval`、`every`、`Retry-After` 是秒。
 - **停站维护**：网页上的动作（今天的星、连向我、私聊、星友圈、第三批）停站时回答 `503 {"error": "stop", "say": "说明", "until": 毫秒}`，令牌没事，等到 `until` 以后再试；提醒、星卡、地图榜照常。
-- **示例**：每个接口的完整示例回答在 [`examples/responses.json`](examples/responses.json)，是离线生成的假数据。
+- **示例**：每个接口的完整示例回答在 [`examples/responses.json`](examples/responses.json)。不用令牌的那些（地图榜、地图、模型榜、社团、公告）是 vrcc.cc 上的真实回答，里面的地图、模型、社团都能打开；玩家自己的（`me/…`）是离线生成的示例玩家，里面提到的地图和社团也是真的。
+
+### 翻页
+
+开放数据的列表（`boards/maps`、`boards/models`，各种 `sort` 和往周，以及 `clubs`）都这样翻（1.19.2 起）：
+
+- `limit`：一页几条，1–100，默认 20（不是数字或是 `0` 时按 20，超过 100 按 100）。
+- `offset`：从第几条开始，0 起的整数，默认 0，最大 10000。不是这样的写法（负数、小数、字母、超过 10000）返回 `400 bad_request`；超过总数的给空数组。
+- 回答里 `total` 是一共几条，`next` 是下一页的 `offset`，已经是最后一页时是 `null`。照着 `next` 一页页问，直到它是 `null`。
+- 翻的是服务器缓存里同一份列表，顺序是固定的；列表最多每 5 分钟变一次，翻到一半刚好变了，可能有一条重复或漏掉，按 id（地图 `world`、模型 `id`、社团 `code`）去重即可。
+- 不带 `offset` 的请求和以前一样，只是多了 `total`、`next` 两个字段。
+
+```
+GET /api/v1/clubs?limit=20             → {"total": …, "clubs": [第 1–20 个], "next": 20 或 null, …}
+GET /api/v1/boards/maps?limit=20       → {"total": …, "maps": [第 1–20 名], "next": 20 或 null, …}
+GET /api/v1/boards/maps?limit=20&offset=20 → {"maps": [第 21–40 名], "next": 40 或 null, …}
+```
+
+（`total` 和 `next` 看线上实际有几条；最后一页的 `next` 是 `null`。）
 
 ### 权限（scope）
 
@@ -369,7 +388,7 @@ sequenceDiagram
 
 ### 排行：`GET /api/v1/boards/maps?limit=20`
 
-返回**有评分**的地图，按总榜名次排，`limit` 取值 `1–100`（默认 `20`；不是数字或是 `0` 时按 `20`，超过 `100` 按 `100`）。名次怎么算见下面「名次怎么算」。
+返回**有评分**的地图，按总榜名次排，可以[翻页](#翻页)（`limit`、`offset`，回答有 `total`、`next`，1.19.2 起）。`limit` 取值 `1–100`（默认 `20`；不是数字或是 `0` 时按 `20`，超过 `100` 按 `100`）。名次怎么算见下面「名次怎么算」。
 
 `sort`（1.13.0 起）：不写或 `top` 是总榜；`week` 是本周榜（北京时间周一零点以后有人打分的地图，只按本周的打分排，和网页「本周」一样，每张多一个 `week`：本周几人打分）；`new` 是新上榜（所有地图，最新加的在前，还没评分的 `rank` 是 `null`）。别的值返回 `400 bad_request`。和网页地图榜的「总榜」「本周」「新上榜」一样，只是不分星池。
 
@@ -409,6 +428,8 @@ sequenceDiagram
 | `sort` | `string` | 这次用的排序：`top`、`week` 或 `new`（1.13.0 起） |
 | `min` | `integer` | 有名次最少需要几人评分（当前为 `1`） |
 | `at` | `integer` | 这份榜单快照生成的时间（毫秒时间戳） |
+| `total` | `integer` | 这个排序（和这一周）一共几张图（1.19.2 起，见[翻页](#翻页)） |
+| `next` | `integer \| null` | 下一页的 `offset`，最后一页是 `null`（1.19.2 起） |
 | `maps[].world` | `string` | VRChat 世界 ID（`wrld_…`） |
 | `maps[].name` | `string` | 地图名 |
 | `maps[].author` | `string \| null` | 地图作者 |
@@ -487,7 +508,7 @@ sequenceDiagram
 
 ### 模型榜排行：`GET /api/v1/boards/models?limit=20`
 
-`limit` 和地图榜一样（1–100，默认 20）。`sort`：不写或 `top` 是总榜（有人喜欢的，按名次排：喜欢多的在前，一样多时本周多的在前，再一样新加的在前）；`week` 是本周（北京时间周一零点以后有人喜欢的，按本周的喜欢排）；`new` 是新上榜（全部，最新加的在前，没人喜欢的 `rank` 是 `null`）。别的值返回 `400 bad_request`。
+`limit`、`offset`、`total`、`next` 和地图榜一样，见[翻页](#翻页)。`sort`：不写或 `top` 是总榜（有人喜欢的，按名次排：喜欢多的在前，一样多时本周多的在前，再一样新加的在前）；`week` 是本周（北京时间周一零点以后有人喜欢的，按本周的喜欢排）；`new` 是新上榜（全部，最新加的在前，没人喜欢的 `rank` 是 `null`）。别的值返回 `400 bad_request`。
 
 `sort=week` 的 `weeks`、`w`、`place`、`move`、`fresh` 和地图榜的[往周和升降](#排行get-apiv1boardsmapslimit20)一样：本周喜欢满 3 个才有名次，往周是周一零点存下的样子。模型榜的往周用的是所有星池都能看到的那份。往周里 `week` 是那一周的喜欢数；模型榜没有 `weekAvg`。
 
@@ -498,18 +519,18 @@ sequenceDiagram
   "at": 1792830000000,
   "models": [
     {
-      "id": 5381000,
-      "name": "オリジナル3Dモデル「真冬」",
-      "short": "Mafuyu 真冬",
-      "shop": "Studio Shiori",
-      "price": "¥ 6,000",
-      "likes": 12,
-      "week": 3,
+      "id": 8962830,
+      "name": "【発売記念SALE✧】ソルト -Salt- / オリジナル3Dモデル",
+      "short": "Salt ソルト",
+      "shop": "あまとうさぎ",
+      "price": "¥ 5,000",
+      "likes": 39,
+      "week": 8,
       "rank": 1,
-      "page": "https://vrcc.cc/models/5381000",
-      "img": "https://vrcc.cc/models/5381000.jpg",
-      "booth": "https://booth.pm/ja/items/5381000",
-      "hot": { "text": "表情很多，换装方便", "by": "某位彩蛋猎人", "up": 2 }
+      "page": "https://vrcc.cc/models/8962830",
+      "img": "https://vrcc.cc/models/8962830.jpg",
+      "booth": "https://booth.pm/ja/items/8962830",
+      "hot": { "text": "真冬风味巧克力（", "by": "某位织光工匠", "up": 4 }
     }
   ]
 }
@@ -549,7 +570,7 @@ sequenceDiagram
 
 不用令牌，和地图榜一样带 `client`。内容和社团公开页 `https://vrcc.cc/c/<短码>` 一样（就是社团放在 VRChat 群组链接栏里的那个链接），适合社团自己的网站、机器人或世界里的展板。`{code}` 是群组短码（如 `VRCN.0483`，大小写都行）。服务器最多 1 分钟更新一次。
 
-**短码从哪来：** 没有公开的社团列表接口，也没有社团的站点地图（公开页 `/c/` 第一版不进搜索）。短码就是 VRChat 群组自己的短码（群组页上 `名字.四位数字` 那一串），入驻的社团会把 `https://vrcc.cc/c/<短码>` 放在群组的链接栏里，社团分享的招新链接也是它。要列出玩家看得到的所有社团，用下面的 `GET /api/v1/me/clubs`（要玩家授权 `clubs`）。可以先用 `VRCN.0483`（VRChat 中文社区）试。
+**短码从哪来：** 用下面的 [`GET /api/v1/clubs`](#公开的社团列表get-apiv1clubslimit20)（1.19.2 起）列出所有公开的社团，再拿 `code` 来查一个。短码就是 VRChat 群组自己的短码（群组页上 `名字.四位数字` 那一串），入驻的社团会把 `https://vrcc.cc/c/<短码>` 放在群组的链接栏里，招新链接也是它。比如 `VRCN.0483`（VRChat 中文社区）。
 
 ```json
 {
@@ -587,6 +608,32 @@ sequenceDiagram
 - 只有显示中、所有人可见的社团有回答；没入驻、审核中、下架、只给成员看、不展示的，一律是同样的 `404 not_found`（和公开页一样，看不出是哪一种）。
 - 不给挂着这个社团的是谁、简介、公告、海报、动态，这些只在星遇同频里看得到（下面的玩家接口有简介和公告）。
 
+### 公开的社团列表：`GET /api/v1/clubs?limit=20`
+
+1.19.2 起。不用令牌，带 `client`。列出 `clubs/{code}` 能查到的所有社团（显示中、所有人可见的），每个社团的字段和 `clubs/{code}` 的 `club` 一模一样，见上一节。只给仅成员可见、不展示、审核中、下架的社团不在里面；也不给挂着社团的是谁、简介、公告、海报。
+
+例子（只留了两个社团，`total` 是真实回答里的总数，以线上为准）：
+
+```json
+{
+  "total": "…",
+  "clubs": [
+    { "code": "VRCN.0483", "name": "VRChat中文社区", "lede": "共同构建一个开放、多元且充满创意的社群。", "tags": ["新人友好", "聊天"], "members": 386, "here": 8, "since": 2024,
+      "grade": 4, "gradeName": "北极星", "icon": "https://vrcc.cc/c/VRCN.0483.icon.jpg?v=1rridu8", "banner": "https://vrcc.cc/c/VRCN.0483.banner.jpg?v=tjtz36",
+      "page": "https://vrcc.cc/c/VRCN.0483", "group": "https://vrchat.com/home/group/grp_a72a2c19-3305-4695-b83e-e7ffadcd529e" },
+    { "code": "MXCLUB.9225", "name": "萌新社", "lede": "带新人，逛图，拍照，聊天，小活动都在这里哦", "tags": ["聊天", "新人友好"], "members": 3859, "here": 2, "since": 2025,
+      "grade": 3, "gradeName": "一等星", "icon": "https://vrcc.cc/c/MXCLUB.9225.icon.jpg?v=178jwb0", "banner": "https://vrcc.cc/c/MXCLUB.9225.banner.jpg?v=q752od",
+      "page": "https://vrcc.cc/c/MXCLUB.9225", "group": "https://vrchat.com/home/group/grp_8cb51240-1b91-4551-929e-eb5a073b734e" }
+  ],
+  "at": 1794412800000
+}
+```
+
+- `total`：一共几个公开的社团；`clubs` 是这一页，`next` 是下一页的 `offset`（没有了是 `null`），`limit`、`offset` 见[翻页](#翻页)。
+- 顺序固定：点赞多的在前（验证过 VRChat 的星点的），一样多时群组人数多的在前，再按短码。网页上的社团列表每天换一次顺序，这里不换。点赞数本身不给。
+- 服务器最多 5 分钟更新一次（和地图榜一样）；社团功能关着时是空列表。
+- 拿到短码以后：用 [`GET /api/v1/clubs/{code}`](#一个社团get-apiv1clubscode) 查一个，或者直接打开 `page`（公开页）、`group`（VRChat 群组页）。图片地址（`icon`、`banner`）里的 `v` 是版本，图换了它会变，存的时候连 `v` 一起存。
+
 ### 玩家看到的社团：`GET /api/v1/me/clubs`
 
 **需要权限 `clubs`（敏感，只给审核过的客户端）。** 和网页「星友圈 → 社团」一样，这位玩家所在星池里、TA 能看到的社团（包括只给成员看、TA 挂着的）。只读，不会算进社团的曝光数，也不会消掉网页上「社团」的红点。
@@ -594,11 +641,11 @@ sequenceDiagram
 ```json
 {
   "clubs": [
-    { "code": "STAR.0420", "name": "星夜电台", "lede": "每周五晚上一起听歌", "tags": ["聊天", "音乐"], "langs": ["中文"], "members": 128, "here": 1, "since": 2024,
-      "grade": 2, "gradeName": "二等星", "icon": "https://vrcc.cc/c/STAR.0420.icon.jpg?v=fc533l", "banner": null, "page": "https://vrcc.cc/c/STAR.0420",
-      "group": "https://vrchat.com/home/group/grp_…", "likes": 0, "room": false, "event": false, "followed": true, "member": true }
+    { "code": "VRCN.0483", "name": "VRChat中文社区", "lede": "共同构建一个开放、多元且充满创意的社群。", "tags": ["新人友好","聊天"], "langs": ["中文"], "members": 386, "here": 1, "since": 2024,
+      "grade": 4, "gradeName": "北极星", "icon": "https://vrcc.cc/c/VRCN.0483.icon.jpg?v=fc533l", "banner": null, "page": "https://vrcc.cc/c/VRCN.0483", "group": "https://vrchat.com/home/group/grp_a72a2c19-3305-4695-b83e-e7ffadcd529e",
+      "likes": 0, "room": false, "event": false, "followed": true, "member": true }
   ],
-  "mine": ["STAR.0420"]
+  "mine": ["VRCN.0483"]
 }
 ```
 
@@ -1384,7 +1431,7 @@ sequenceDiagram
 需要权限 `posts.write`。**只在玩家自己点「发布」时发。** 只能发文字，不能带图。
 
 ```json
-{ "kind": "text", "text": "今天在星夜茶屋认识了新朋友", "vis": "all" }
+{ "kind": "text", "text": "今天在「孤」认识了新朋友", "vis": "all" }
 ```
 
 - `vis`：`all` 所有人、`mutual` 只给互相连上的人。
@@ -1650,7 +1697,7 @@ curl -H "X-Client: app_0123456789abcdef" -H "Authorization: Bearer <access_token
 | `me/notifications` | `?since=<上次的 last>` | 5 条 |
 | `me/chats/{n}` | `?before=<id>` 往前、`?after=<id>` 往后、`?since=<id>`；回答 `more` 表示前面还有 | 一页 |
 | `me/posts` | `?before=<上一页最后一条的 id>`；回答 `page` 是每页条数 | `page` 条 |
-| `boards/maps`、`boards/models` | `?limit=`（1–100） | 100 |
+| `boards/maps`、`boards/models`、`clubs` | `?limit=`（1–100）`&offset=`；回答 `total`、`next`（见[翻页](#翻页)，1.19.2 起） | 100 |
 | `me/inbox`、`me/mutuals`、`me/maps` | 不能翻页 | 200 |
 | `me/hidden` | 不能翻页 | 300 |
 | `me/notes` | 不能翻页 | 60 |
@@ -1699,7 +1746,7 @@ curl -H "X-Client: app_0123456789abcdef" -H "Authorization: Bearer <access_token
 | **连接码（`/connect`）** | 每个网络地址每天 **30 次** |
 | **用星遇同频登录（玩家点「继续」）** | 每位玩家每天 **100 次** |
 | **打分（`/me/maps/{world}/rating`）** | 和网页地图榜共用每天的打分与添图次数 |
-| **开放数据（地图榜、模型榜）** | 服务器最多 **5 分钟**更新一次，问得再勤也是同一份；社团（`clubs/{code}`）最多 1 分钟 |
+| **开放数据（地图榜、模型榜、社团列表）** | 服务器最多 **5 分钟**更新一次，问得再勤也是同一份；一个社团（`clubs/{code}`）最多 1 分钟 |
 | **写，每个授权每天** | 连线和说一句合计 **20**；私聊和撤回合计 **100**；发星友圈 **5**；各种举报合计 **10**；隐藏和恢复合计 **50**；评论 **50**；点亮 **200**；各种删除和合照合计 **50**；地图赞踩 **200**；添加地图 **10**；写介绍 **10**。网页自己的上限照样算 |
 
 ---

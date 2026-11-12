@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: "星遇同频 · 开放接口 (Open API v1)"
-  version: "1.19.1"
+  version: "1.19.2"
   summary: "VRChat 中文社区「星遇同频」开放数据与第三方客户端接口"
   description: |
     [星遇同频](https://vrcc.cc/match/) 的官方开放接口，基础地址为 `https://vrcc.cc/api/v1/`。
@@ -178,6 +178,10 @@ paths:
             minimum: 1
             maximum: 100
             default: 20
+        - name: offset
+          in: query
+          description: "从第几条开始（0 起的整数，最大 10000；别的写法返回 400，超过总数给空数组）。和 limit 一起翻页，照回答的 next 问下一页（1.19.2 起）"
+          schema: { type: integer, minimum: 0, maximum: 10000, default: 0 }
         - name: sort
           in: query
           description: "top 总榜（默认）；week 本周榜（周一零点以后有人打分的，只按本周的打分排，和网页「本周」一样，每张带 week）；new 新上榜（最新加的在前，含未评分的）。别的值返回 400（1.13.0 起）"
@@ -215,6 +219,8 @@ paths:
                     type: string
                     enum: [top, week, new]
                     description: "这次用的排序（1.13.0 起）"
+                  total: { type: integer, description: "一共几条（1.19.2 起）" }
+                  next: { type: [integer, "null"], description: "下一页的 offset，最后一页是 null（1.19.2 起）" }
                   weeks:
                     type: array
                     description: "只在 sort=week 时有：存过的周（那周有图上榜），新的在前，最多 104 周。周一零点（北京时间）结束时存下，以后不再变（1.16.0 起）"
@@ -247,24 +253,24 @@ paths:
                     min: 1
                     at: 1792830000000
                     maps:
-                      - world: "wrld_4432ea9b-729c-46e3-8eaf-846aa0a37fdd"
-                        name: "星夜茶屋 Starry Tea House"
-                        author: "Shiori"
-                        avg: 9.2
-                        raters: 18
+                      - world: "wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570"
+                        name: "孤"
+                        author: "Miro-cn"
+                        avg: 9.6
+                        raters: 60
                         rank: 1
-                        weight: "light"
-                        page: "https://vrcc.cc/maps/wrld_4432ea9b-729c-46e3-8eaf-846aa0a37fdd"
-                        img: "https://vrcc.cc/maps/wrld_4432ea9b-729c-46e3-8eaf-846aa0a37fdd.jpg"
-                      - world: "wrld_791ebf58-54ce-4d3a-a0a0-39f10f1b2088"
-                        name: "琥珀海岸 Amber Coast"
-                        author: "Kaze"
-                        avg: 8.8
-                        raters: 9
-                        rank: 2
                         weight: "mid"
-                        page: "https://vrcc.cc/maps/wrld_791ebf58-54ce-4d3a-a0a0-39f10f1b2088"
-                        img: "https://vrcc.cc/maps/wrld_791ebf58-54ce-4d3a-a0a0-39f10f1b2088.jpg"
+                        page: "https://vrcc.cc/maps/wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570"
+                        img: "https://vrcc.cc/maps/wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570.jpg"
+                      - world: "wrld_c3cf550b-b987-45ef-8b96-cc61fa6c2fde"
+                        name: "Steps of Time ⁄ 時間の階段"
+                        author: "_Harim"
+                        avg: 9.9
+                        raters: 14
+                        rank: 2
+                        weight: null
+                        page: "https://vrcc.cc/maps/wrld_c3cf550b-b987-45ef-8b96-cc61fa6c2fde"
+                        img: "https://vrcc.cc/maps/wrld_c3cf550b-b987-45ef-8b96-cc61fa6c2fde.jpg"
         '403':
           $ref: "#/components/responses/ClientError"
         '429':
@@ -287,6 +293,10 @@ paths:
           in: query
           description: "返回条数（1–100，默认 20）"
           schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - name: offset
+          in: query
+          description: "从第几条开始（0 起的整数，最大 10000；别的写法返回 400，超过总数给空数组）。和 limit 一起翻页，照回答的 next 问下一页（1.19.2 起）"
+          schema: { type: integer, minimum: 0, maximum: 10000, default: 0 }
         - name: sort
           in: query
           description: "top 总榜（默认，有人喜欢的）；week 本周（周一零点以后有人喜欢的）；new 新上榜（全部，最新加的在前）。别的值返回 400"
@@ -310,6 +320,8 @@ paths:
                 properties:
                   board: { type: string, const: "models" }
                   sort: { type: string, enum: [top, week, new] }
+                  total: { type: integer, description: "一共几条（1.19.2 起）" }
+                  next: { type: [integer, "null"], description: "下一页的 offset，最后一页是 null（1.19.2 起）" }
                   weeks:
                     type: array
                     description: "只在 sort=week 时有：存过的周，新的在前"
@@ -365,6 +377,44 @@ paths:
                   at: { type: integer }
         '404':
           description: "不在榜上（not_found）"
+        '403':
+          $ref: "#/components/responses/ClientError"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /clubs:
+    get:
+      tags: ["社团"]
+      summary: "公开的社团列表"
+      operationId: getClubs
+      description: "所有公开的社团（1.19.2 起）：clubs/{code} 能查到的那些（显示中、所有人可见），每个和 clubs/{code} 的 club 一样。顺序固定：点赞多的在前，再按群组人数、短码。最多 5 分钟更新一次；社团功能关着时是空列表。"
+      security:
+        - client: []
+        - clientQuery: []
+      parameters:
+        - name: limit
+          in: query
+          description: "返回条数（1–100，默认 20）"
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - name: offset
+          in: query
+          description: "从第几条开始（0 起的整数，最大 10000；别的写法返回 400，超过总数给空数组）。和 limit 一起翻页，照回答的 next 问下一页（1.19.2 起）"
+          schema: { type: integer, minimum: 0, maximum: 10000, default: 0 }
+      responses:
+        '200':
+          description: "公开的社团"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total: { type: integer, description: "一共几个公开的社团" }
+                  clubs:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Club"
+                  next: { type: [integer, "null"], description: "下一页的 offset，最后一页是 null" }
+                  at: { type: integer, description: "列表生成的时间（毫秒）" }
         '403':
           $ref: "#/components/responses/ClientError"
         default:
@@ -512,7 +562,7 @@ paths:
           description: "逗号分隔的地图 ID（wrld_…），最多 20 个"
           schema:
             type: string
-            example: "wrld_4432ea9b-729c-46e3-8eaf-846aa0a37fdd,wrld_791ebf58-54ce-4d3a-a0a0-39f10f1b2088"
+            example: "wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570,wrld_c3cf550b-b987-45ef-8b96-cc61fa6c2fde"
         - name: client
           in: query
           description: "客户端标识（仅在无法发送 X-Client 请求头时使用）"
@@ -1538,11 +1588,11 @@ paths:
                         type: integer
               example:
                 map:
-                  id: wrld_bbbbbbbb-0000-4000-8000-0000000000b2
+                  id: wrld_c3cf550b-b987-45ef-8b96-cc61fa6c2fde
                   name: 雨中车站
                   author: 某位作者
                   cap: 16
-                  img: /api/match?xdimg=wrld_bbbbbbbb-0000-4000-8000-0000000000b2
+                  img: /api/match?xdimg=wrld_c3cf550b-b987-45ef-8b96-cc61fa6c2fde
                   status: ok
                   teen: true
                   avg: null
@@ -1564,8 +1614,8 @@ paths:
                     - 0
                   perf: null
                   rooms: []
-                  world: wrld_bbbbbbbb-0000-4000-8000-0000000000b2
-                  imgUrl: https://vrcc.cc/api/match?xdimg=wrld_bbbbbbbb-0000-4000-8000-0000000000b2
+                  world: wrld_c3cf550b-b987-45ef-8b96-cc61fa6c2fde
+                  imgUrl: https://vrcc.cc/api/match?xdimg=wrld_c3cf550b-b987-45ef-8b96-cc61fa6c2fde
                 intro: null
                 intros: 0
                 sort: hot
@@ -2685,11 +2735,11 @@ paths:
                   maps: false
                   went: false
                 maps:
-                  - id: wrld_aaaaaaaa-0000-4000-8000-0000000000a1
-                    name: 星夜茶屋
+                  - id: wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570
+                    name: 孤
                     author: 某位作者
                     cap: 16
-                    img: /api/match?xdimg=wrld_aaaaaaaa-0000-4000-8000-0000000000a1
+                    img: /api/match?xdimg=wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570
                     status: ok
                     teen: true
                     avg: 8.5
@@ -2714,8 +2764,8 @@ paths:
                         vote: 0
                     weight: null
                     room: false
-                    world: wrld_aaaaaaaa-0000-4000-8000-0000000000a1
-                    imgUrl: https://vrcc.cc/api/match?xdimg=wrld_aaaaaaaa-0000-4000-8000-0000000000a1
+                    world: wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570
+                    imgUrl: https://vrcc.cc/api/match?xdimg=wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570
         "403": { description: "权限不够（scope / scope_unreviewed）" }
         "429": { description: "今天的次数用完了" }
   /me/maps/{world}/page:
@@ -2891,11 +2941,11 @@ paths:
                         type: integer
               example:
                 map:
-                  id: wrld_aaaaaaaa-0000-4000-8000-0000000000a1
-                  name: 星夜茶屋
+                  id: wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570
+                  name: 孤
                   author: 某位作者
                   cap: 16
-                  img: /api/match?xdimg=wrld_aaaaaaaa-0000-4000-8000-0000000000a1
+                  img: /api/match?xdimg=wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570
                   status: ok
                   teen: true
                   avg: 8.5
@@ -2918,8 +2968,8 @@ paths:
                     - 0
                   perf: null
                   rooms: []
-                  world: wrld_aaaaaaaa-0000-4000-8000-0000000000a1
-                  imgUrl: https://vrcc.cc/api/match?xdimg=wrld_aaaaaaaa-0000-4000-8000-0000000000a1
+                  world: wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570
+                  imgUrl: https://vrcc.cc/api/match?xdimg=wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570
                 intro:
                   id: 1
                   text: 夜里人少，适合安静地坐一会儿。
@@ -3232,11 +3282,11 @@ paths:
                         type: integer
               example:
                 map:
-                  id: wrld_aaaaaaaa-0000-4000-8000-0000000000a1
-                  name: 星夜茶屋
+                  id: wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570
+                  name: 孤
                   author: 某位作者
                   cap: 16
-                  img: /api/match?xdimg=wrld_aaaaaaaa-0000-4000-8000-0000000000a1
+                  img: /api/match?xdimg=wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570
                   status: ok
                   teen: true
                   avg: 8.5
@@ -3259,8 +3309,8 @@ paths:
                     - 0
                   perf: null
                   rooms: []
-                  world: wrld_aaaaaaaa-0000-4000-8000-0000000000a1
-                  imgUrl: https://vrcc.cc/api/match?xdimg=wrld_aaaaaaaa-0000-4000-8000-0000000000a1
+                  world: wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570
+                  imgUrl: https://vrcc.cc/api/match?xdimg=wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570
                 intro:
                   id: 1
                   text: 夜里人少，适合安静地坐一会儿。
@@ -3504,11 +3554,11 @@ paths:
                         type: integer
               example:
                 map:
-                  id: wrld_aaaaaaaa-0000-4000-8000-0000000000a1
-                  name: 星夜茶屋
+                  id: wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570
+                  name: 孤
                   author: 某位作者
                   cap: 16
-                  img: /api/match?xdimg=wrld_aaaaaaaa-0000-4000-8000-0000000000a1
+                  img: /api/match?xdimg=wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570
                   status: ok
                   teen: true
                   avg: 8.5
@@ -3531,8 +3581,8 @@ paths:
                     - 0
                   perf: null
                   rooms: []
-                  world: wrld_aaaaaaaa-0000-4000-8000-0000000000a1
-                  imgUrl: https://vrcc.cc/api/match?xdimg=wrld_aaaaaaaa-0000-4000-8000-0000000000a1
+                  world: wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570
+                  imgUrl: https://vrcc.cc/api/match?xdimg=wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570
                 intro:
                   id: 1
                   text: 夜里人少，适合安静地坐一会儿。
@@ -3714,11 +3764,11 @@ paths:
                         type: integer
               example:
                 map:
-                  id: wrld_aaaaaaaa-0000-4000-8000-0000000000a1
-                  name: 星夜茶屋
+                  id: wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570
+                  name: 孤
                   author: 某位作者
                   cap: 16
-                  img: /api/match?xdimg=wrld_aaaaaaaa-0000-4000-8000-0000000000a1
+                  img: /api/match?xdimg=wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570
                   status: ok
                   teen: true
                   avg: 8
@@ -3741,8 +3791,8 @@ paths:
                     - 0
                   perf: null
                   rooms: []
-                  world: wrld_aaaaaaaa-0000-4000-8000-0000000000a1
-                  imgUrl: https://vrcc.cc/api/match?xdimg=wrld_aaaaaaaa-0000-4000-8000-0000000000a1
+                  world: wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570
+                  imgUrl: https://vrcc.cc/api/match?xdimg=wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570
                 intro:
                   id: 1
                   text: 夜里人少，适合安静地坐一会儿。
@@ -4462,7 +4512,7 @@ paths:
                   const: "text"
                 text:
                   type: string
-                  example: "今天在星夜茶屋认识了新朋友"
+                  example: "今天在「孤」认识了新朋友"
                 vis:
                   type: string
                   enum: ["all", "mutual"]
@@ -4726,7 +4776,7 @@ components:
       type: string
       pattern: "^wrld_[0-9a-f-]{36}$"
       description: "VRChat 世界 ID（wrld_ 加 UUID）"
-      example: "wrld_4432ea9b-729c-46e3-8eaf-846aa0a37fdd"
+      example: "wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570"
 
     Need:
       type: [string, "null"]
@@ -4842,7 +4892,7 @@ components:
         name:
           type: [string, "null"]
           description: "地图名称"
-          example: "星夜茶屋 Starry Tea House"
+          example: "孤"
         score:
           type: integer
           minimum: 1
@@ -4865,7 +4915,7 @@ components:
         page:
           type: string
           description: "该地图在地图榜上的详情页"
-          example: "https://vrcc.cc/maps/wrld_4432ea9b-729c-46e3-8eaf-846aa0a37fdd"
+          example: "https://vrcc.cc/maps/wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570"
 
     StarCard:
       type: object
@@ -5232,7 +5282,7 @@ components:
         name:
           type: string
           description: "地图名称"
-          example: "星夜茶屋 Starry Tea House"
+          example: "孤"
         author:
           type: [string, "null"]
           description: "地图作者名称"
@@ -5257,11 +5307,11 @@ components:
         page:
           type: string
           description: "该地图在星遇同频地图榜上的详情页网址"
-          example: "https://vrcc.cc/maps/wrld_4432ea9b-729c-46e3-8eaf-846aa0a37fdd"
+          example: "https://vrcc.cc/maps/wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570"
         img:
           type: [string, "null"]
           description: "地图封面图网址"
-          example: "https://vrcc.cc/maps/wrld_4432ea9b-729c-46e3-8eaf-846aa0a37fdd.jpg"
+          example: "https://vrcc.cc/maps/wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570.jpg"
         hot:
           description: "热评：这张图最热的一条短评，署名「某位<星位>」，没有时为 null"
           oneOf:
@@ -5277,7 +5327,7 @@ components:
       type: object
       required: [id, name, short, shop, price, likes, week, rank, page, img, booth, hot]
       properties:
-        id: { type: integer, description: "BOOTH 商品编号", example: 5381000 }
+        id: { type: integer, description: "BOOTH 商品编号", example: 8962830 }
         name: { type: string, description: "BOOTH 上的商品名（原文）" }
         short: { type: [string, "null"], description: "简称（网页显示的名字）；没有时显示 name" }
         shop: { type: [string, "null"], description: "BOOTH 店铺名" }
@@ -5340,7 +5390,7 @@ components:
         name:
           type: [string, "null"]
           description: "地图名称"
-          example: "星夜茶屋 Starry Tea House"
+          example: "孤"
         board:
           type: boolean
           description: "是否已正式在地图榜上展示"
@@ -5387,11 +5437,11 @@ components:
         img:
           type: [string, "null"]
           description: "封面相对路径（接在 https://vrcc.cc 后面使用），无封面或不可见时为 null"
-          example: "/api/match?xdimg=wrld_4432ea9b-729c-46e3-8eaf-846aa0a37fdd"
+          example: "/api/match?xdimg=wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570"
         imgUrl:
           type: string
           description: "同一张封面的完整网址，有 img 时才有（1.11.0 起）"
-          example: "https://vrcc.cc/api/match?xdimg=wrld_4432ea9b-729c-46e3-8eaf-846aa0a37fdd"
+          example: "https://vrcc.cc/api/match?xdimg=wrld_29e92dbd-b1fa-479a-a53d-1f312cb54570"
 
     ErrorBody:
       type: object
