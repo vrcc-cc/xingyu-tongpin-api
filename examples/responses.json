@@ -364,22 +364,22 @@
     "status": 200,
     "body": {
       "club": {
-        "code": "STAR.0420",
-        "name": "星夜电台",
-        "lede": "每周五晚上一起听歌",
+        "code": "VRCN.0483",
+        "name": "VRChat中文社区",
+        "lede": "共同构建一个开放、多元且充满创意的社群。",
         "tags": [
-          "聊天",
-          "音乐"
+          "新人友好",
+          "聊天"
         ],
-        "members": 128,
-        "here": 1,
+        "members": 386,
+        "here": 8,
         "since": 2024,
-        "grade": 2,
-        "gradeName": "二等星",
-        "icon": "https://vrcc.cc/c/STAR.0420.icon.jpg?v=fc533l",
-        "banner": null,
-        "page": "https://vrcc.cc/c/STAR.0420",
-        "group": "https://vrchat.com/home/group/grp_aaaaaaaa-1111-2222-3333-444444444444"
+        "grade": 4,
+        "gradeName": "北极星",
+        "icon": "https://vrcc.cc/c/VRCN.0483.icon.jpg?v=1rridu8",
+        "banner": "https://vrcc.cc/c/VRCN.0483.banner.jpg?v=tjtz36",
+        "page": "https://vrcc.cc/c/VRCN.0483",
+        "group": "https://vrchat.com/home/group/grp_a72a2c19-3305-4695-b83e-e7ffadcd529e"
       }
     }
   },

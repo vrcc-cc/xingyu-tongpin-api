@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: "星遇同频 · 开放接口 (Open API v1)"
-  version: "1.19.0"
+  version: "1.19.1"
   summary: "VRChat 中文社区「星遇同频」开放数据与第三方客户端接口"
   description: |
     [星遇同频](https://vrcc.cc/match/) 的官方开放接口，基础地址为 `https://vrcc.cc/api/v1/`。
@@ -383,7 +383,7 @@ paths:
         - name: code
           in: path
           required: true
-          description: "群组短码，如 STAR.0420（大小写都行）"
+          description: "群组短码，如 VRCN.0483（大小写都行）。没有公开的社团列表：短码来自 VRChat 群组本身、群组链接栏里的 vrcc.cc/c/<短码>，或 GET /me/clubs"
           schema: { type: string, pattern: "^[A-Za-z0-9]{3,6}\\.\\d{4}$" }
       responses:
         '200':
@@ -5306,7 +5306,7 @@ components:
     Club:
       type: object
       properties:
-        code: { type: string, example: "STAR.0420" }
+        code: { type: string, example: "VRCN.0483" }
         name: { type: string }
         lede: { type: [string, "null"], description: "一句话" }
         tags: { type: array, items: { type: string } }

@@ -547,24 +547,26 @@ sequenceDiagram
 
 ### 一个社团：`GET /api/v1/clubs/{code}`
 
-不用令牌，和地图榜一样带 `client`。内容和社团公开页 `https://vrcc.cc/c/<短码>` 一样（就是社团放在 VRChat 群组链接栏里的那个链接），适合社团自己的网站、机器人或世界里的展板。`{code}` 是群组短码（如 `STAR.0420`，大小写都行）。服务器最多 1 分钟更新一次。
+不用令牌，和地图榜一样带 `client`。内容和社团公开页 `https://vrcc.cc/c/<短码>` 一样（就是社团放在 VRChat 群组链接栏里的那个链接），适合社团自己的网站、机器人或世界里的展板。`{code}` 是群组短码（如 `VRCN.0483`，大小写都行）。服务器最多 1 分钟更新一次。
+
+**短码从哪来：** 没有公开的社团列表接口，也没有社团的站点地图（公开页 `/c/` 第一版不进搜索）。短码就是 VRChat 群组自己的短码（群组页上 `名字.四位数字` 那一串），入驻的社团会把 `https://vrcc.cc/c/<短码>` 放在群组的链接栏里，社团分享的招新链接也是它。要列出玩家看得到的所有社团，用下面的 `GET /api/v1/me/clubs`（要玩家授权 `clubs`）。可以先用 `VRCN.0483`（VRChat 中文社区）试。
 
 ```json
 {
   "club": {
-    "code": "STAR.0420",
-    "name": "星夜电台",
-    "lede": "每周五晚上一起听歌",
-    "tags": ["聊天", "音乐"],
-    "members": 128,
-    "here": 1,
+    "code": "VRCN.0483",
+    "name": "VRChat中文社区",
+    "lede": "共同构建一个开放、多元且充满创意的社群。",
+    "tags": ["新人友好", "聊天"],
+    "members": 386,
+    "here": 8,
     "since": 2024,
-    "grade": 2,
-    "gradeName": "二等星",
-    "icon": "https://vrcc.cc/c/STAR.0420.icon.jpg?v=fc533l",
-    "banner": null,
-    "page": "https://vrcc.cc/c/STAR.0420",
-    "group": "https://vrchat.com/home/group/grp_aaaaaaaa-1111-2222-3333-444444444444"
+    "grade": 4,
+    "gradeName": "北极星",
+    "icon": "https://vrcc.cc/c/VRCN.0483.icon.jpg?v=1rridu8",
+    "banner": "https://vrcc.cc/c/VRCN.0483.banner.jpg?v=tjtz36",
+    "page": "https://vrcc.cc/c/VRCN.0483",
+    "group": "https://vrchat.com/home/group/grp_a72a2c19-3305-4695-b83e-e7ffadcd529e"
   }
 }
 ```
